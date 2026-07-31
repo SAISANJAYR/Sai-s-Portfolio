@@ -1,0 +1,23 @@
+[
+  {
+    "week": 0,
+    "title": "Orientation & Introductions",
+    "status": "completed",
+    "details": [
+      "Orientation.",
+      "Meeting everyone.",
+      "Understanding the culture.",
+      "Learning how the program works.",
+      "Getting introduced to mentors and teammates."
+    ]
+  },
+  {
+    "week": 1,
+    "title": "Foundations",
+    "status": "completed",
+    "details": [
+      "Introduction to interdisciplinary workflows.",
+      "Understanding the capstone problem scope."
+    ]
+  }
+]

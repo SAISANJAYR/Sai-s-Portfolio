@@ -1,0 +1,32 @@
+[
+  {
+    "chapter": 1,
+    "title": "The Beginning",
+    "text": "Towards the end of my 12th standard, Computer Science stopped being another school subject and became something I genuinely wanted to understand.\n\nThat curiosity led me to Harvard's CS50P."
+  },
+  {
+    "chapter": 2,
+    "title": "Learning How To Think",
+    "text": "CS50P wasn't simply about Python.\n\nIt taught me\n• Problem solving\n• Logical thinking\n• Breaking difficult problems into manageable pieces\n• Patience\n• Confidence\n\nCompleting it entirely on my own became one of the defining moments of my early learning journey."
+  },
+  {
+    "chapter": 3,
+    "title": "Discovering Intelligence",
+    "text": "After learning programming, a new question appeared.\n\n\"How do machines actually think?\"\n\nThat question naturally led me to Harvard's CS50AI.\n\nInstead of another programming course, it introduced me to the foundations of Artificial Intelligence.\n\nSearch.\nOptimization.\nMachine Learning.\nNeural Networks.\nReasoning.\n\nIt wasn't another certificate.\n\nIt changed the questions I was asking."
+  },
+  {
+    "chapter": 4,
+    "title": "Going Deeper",
+    "text": "Curiosity naturally expanded into Machine Learning and Deep Learning.\n\nI completed Deep Learning for Computer Vision with TensorFlow.\n\nThen explored JAX.\nThen PyTorch.\n\nEvery framework became another way of understanding the same ideas.\n\nInstead of attaching myself to one ecosystem, I became interested in understanding the concepts beneath them."
+  },
+  {
+    "chapter": 5,
+    "title": "Building",
+    "text": "Learning slowly transformed into building.\n\nHackathons.\nBackend systems.\nArtificial Intelligence.\nOpenEnv.\nCollaborative projects.\n\nEvery project became another opportunity to understand how real systems are built."
+  },
+  {
+    "chapter": 6,
+    "title": "Still Becoming",
+    "text": "I don't define myself by a framework.\nOr a programming language.\n\nI enjoy exploring ideas.\n\nWhether that's\nAI.\nDistributed Systems.\nBackend Engineering.\nCinema.\nBooks.\nMusic.\nDesign.\n\nEvery subject offers another perspective.\n\nI'm simply trying to understand the world a little better than yesterday."
+  }
+]
