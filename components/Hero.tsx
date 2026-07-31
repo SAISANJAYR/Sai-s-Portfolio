@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ParticleField from "./ParticleField";
@@ -8,6 +8,8 @@ import ParticleField from "./ParticleField";
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
@@ -17,7 +19,7 @@ export default function Hero() {
   const mainIntroRef = useRef<HTMLDivElement>(null);
 
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     let ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
