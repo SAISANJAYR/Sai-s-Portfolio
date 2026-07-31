@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import ParticleField from "./ParticleField";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
-
-const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
@@ -18,39 +17,33 @@ export default function Hero() {
   const helloRef = useRef<HTMLDivElement>(null);
   const mainIntroRef = useRef<HTMLDivElement>(null);
 
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: "top top",
+        end: "+=300%",
+        pin: true,
+        scrub: 1,
+      }
+    });
 
-  useIsomorphicLayoutEffect(() => {
-    let ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top top",
-          end: "+=300%",
-          pin: true,
-          scrub: 1,
-        }
-      });
+    // Step 1: Hands part & Hello there appears
+    tl.to(leftHandRef.current, { xPercent: -50, opacity: 0, duration: 1 }, 0)
+      .to(rightHandRef.current, { xPercent: 50, opacity: 0, duration: 1 }, 0)
+      .to(helloRef.current, { opacity: 1, y: 0, duration: 1 }, 0.2);
 
-      // Step 1: Hands part & Hello there appears
-      tl.to(leftHandRef.current, { xPercent: -50, opacity: 0, duration: 1 }, 0)
-        .to(rightHandRef.current, { xPercent: 50, opacity: 0, duration: 1 }, 0)
-        .to(helloRef.current, { opacity: 1, y: 0, duration: 1 }, 0.2);
+    // Step 2: Hello fades out
+    tl.to(helloRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.8 }, 1.5);
 
-      // Step 2: Hello fades out
-      tl.to(helloRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.8 }, 1.5);
-
-      // Step 3: Main Intro appears from center (scale in from 0.9)
-      tl.fromTo(
-        mainIntroRef.current,
-        { opacity: 0, scale: 0.9, y: 0 },
-        { opacity: 1, scale: 1, duration: 1.2, ease: "power2.out" },
-        2
-      );
-
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
+    // Step 3: Main Intro appears from center (scale in from 0.9)
+    tl.fromTo(
+      mainIntroRef.current,
+      { opacity: 0, scale: 0.9, y: 0 },
+      { opacity: 1, scale: 1, duration: 1.2, ease: "power2.out" },
+      2
+    );
+  }, { scope: containerRef });
 
   return (
     <div>
