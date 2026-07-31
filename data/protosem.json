@@ -4,11 +4,10 @@
     "title": "Orientation & Introductions",
     "status": "completed",
     "details": [
-      "Orientation.",
-      "Meeting everyone.",
-      "Understanding the culture.",
-      "Learning how the program works.",
-      "Getting introduced to mentors and teammates."
+      "Day 1: Explored the labs and machineries, got introduced to the staffs and fellow students, and played a brain-intensive game.",
+      "Day 2: Divided into teams to analyze a case study and answer technical questions, followed by a detailed introduction to the 20-week program and past works.",
+      "Day 3: Browsed through ZenPencils comics and did a presentation on a comic we could relate to ourselves.",
+      "Day 4: Team-building activity - built a spaghetti stick base to balance a marshmallow on top."
     ]
   },
   {
@@ -16,8 +15,8 @@
     "title": "Foundations",
     "status": "completed",
     "details": [
-      "Introduction to interdisciplinary workflows.",
-      "Understanding the capstone problem scope."
+      "Day 1-3: Followed and implemented the principles of 5S.",
+      "Day 4-5: Worked on building this portfolio website and hosting it on Vercel."
     ]
   }
 ]

@@ -5,7 +5,6 @@ import Nav from "@/components/Nav";
 import Cursor from "@/components/Cursor";
 import Grain from "@/components/Grain";
 import SmoothScroll from "@/components/SmoothScroll";
-import ParticleField from "@/components/ParticleField";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -35,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SmoothScroll />
         <Cursor />
         <Grain />
-        <ParticleField />
+
         <Nav />
         {children}
       </body>
