@@ -1,122 +1,86 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import ParticleField from "./ParticleField";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { useEffect, useRef } from "react";
+import Image from "next/image";
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null);
-  const leftHandRef = useRef<HTMLImageElement>(null);
-  const rightHandRef = useRef<HTMLImageElement>(null);
-  const helloRef = useRef<HTMLDivElement>(null);
-  const mainIntroRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: "top top",
-        end: "+=300%",
-        pin: true,
-        scrub: 1,
-      }
-    });
-
-    // Step 1: Hands part & Hello there appears
-    tl.to(leftHandRef.current, { xPercent: -50, opacity: 0, duration: 1 }, 0)
-      .to(rightHandRef.current, { xPercent: 50, opacity: 0, duration: 1 }, 0)
-      .to(helloRef.current, { opacity: 1, y: 0, duration: 1 }, 0.2);
-
-    // Step 2: Hello fades out
-    tl.to(helloRef.current, { opacity: 0, y: -80, scale: 0.9, duration: 0.8 }, 1.5);
-
-    // Step 3: Main Intro appears from center (scale in from 0.9)
-    tl.fromTo(
-      mainIntroRef.current,
-      { opacity: 0, scale: 0.9, y: 0 },
-      { opacity: 1, scale: 1, duration: 1.2, ease: "power2.out" },
-      2
-    );
-  }, { scope: containerRef });
+  // We can add a simple CSS float animation globally in globals.css, or inline it.
+  // For simplicity, we'll use CSS classes for floating.
 
   return (
-    <div>
-      <section className="relative w-full h-screen overflow-hidden" id="home" ref={containerRef}>
-
-        {/* SPIRAL PARTICLES — contained inside section so they don't leak */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-25">
-          <ParticleField />
-        </div>
-
-        {/* HANDS & HELLO SCENE */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-
-          {/* Hands — anchored to bottom center, meeting in the middle */}
-          <div className="absolute inset-0 w-full h-full overflow-hidden">
-            <img
-              ref={leftHandRef}
-              src="/left-hand.png"
-              alt="Left Hand"
-              className="absolute left-0 bottom-0 w-[48vw] max-w-[620px] h-auto object-contain object-left origin-left"
-            />
-            <img
-              ref={rightHandRef}
-              src="/right-hand.png"
-              alt="Right Hand"
-              className="absolute right-0 bottom-0 w-[48vw] max-w-[620px] h-auto object-contain object-right origin-right"
-            />
-          </div>
-
-          {/* Hello There — perfectly centered */}
-          <div
-            ref={helloRef}
-            className="absolute opacity-0 translate-y-10 text-center z-20"
-          >
-            <div className="font-mono text-xl md:text-2xl tracking-widest text-charcoal">
-              Hello there.
-              <span className="block mt-3 text-sm text-graymid easter opacity-0 transition-opacity hover:opacity-100">
-                — General Kenobi.
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* MAIN INTRO — starts invisible at center, scales in */}
-        <div
-          ref={mainIntroRef}
-          className="absolute inset-0 opacity-0 flex flex-col items-center justify-center pointer-events-auto px-6 z-20"
+    <section 
+      ref={containerRef} 
+      className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center bg-offwhite"
+      id="home"
+    >
+      {/* Background Spiral / Noise */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-20 flex items-center justify-center">
+        {/* Simple sine wave SVG */}
+        <svg
+          viewBox="0 0 1000 200"
+          className="w-full h-auto min-w-[1200px]"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <div className="w-full max-w-4xl flex flex-col items-center text-center relative z-10">
-            <h1 className="name font-display text-charcoal leading-none mb-6">
-              SaiSanjay R
-            </h1>
+          <path
+            d="M 0 100 Q 125 0 250 100 T 500 100 T 750 100 T 1000 100"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-graymid"
+          />
+        </svg>
+      </div>
 
-            <div className="font-mono text-xs md:text-sm tracking-[0.15em] text-graymid uppercase mb-6">
-              Not because I want to become extraordinary. But because I want to live fully.
-            </div>
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col items-center text-center px-4">
+        <p className="font-mono text-graymid mb-6 tracking-widest text-sm uppercase animate-[fadeIn_1s_ease-out]">
+          Hello there.
+        </p>
+        
+        <h1 className="font-display text-[4rem] sm:text-[6rem] md:text-[8rem] leading-none text-charcoal mb-4 animate-[slideUp_1s_ease-out]">
+          SaiSanjay R
+        </h1>
+        
+        <p className="font-mono text-graymid tracking-[0.2em] text-xs sm:text-sm uppercase animate-[fadeIn_1.5s_ease-out]">
+          AI & DATA SCIENCE · BUILDER · RESEARCHER-IN-PROGRESS
+        </p>
+      </div>
 
-            <div className="font-serif italic text-charcoal/35 text-sm mb-12">
-              "True Perfection has to be Imperfect" — Oasis
-            </div>
-
-            <div className="w-44 h-60 md:w-48 md:h-64 rounded-2xl overflow-hidden glass shadow-xl">
-              <img
-                src="/my_profile.png"
-                alt="SaiSanjay R"
-                className="w-full h-full object-cover object-top"
-              />
-            </div>
-          </div>
+      {/* Floating Elements */}
+      {/* Top Left */}
+      <div className="absolute top-[25%] left-[10%] md:left-[15%] z-20 animate-[float_6s_ease-in-out_infinite]">
+        <div className="glass px-6 py-4 rounded-xl border border-white/40 shadow-sm backdrop-blur-md">
+          <p className="font-mono text-xs text-charcoal font-medium">Currently exploring<br/>AI research.</p>
         </div>
+      </div>
 
-      </section>
-    </div>
+      {/* Bottom Left */}
+      <div className="absolute bottom-[30%] left-[12%] md:left-[20%] z-20 animate-[float_5s_ease-in-out_infinite_1s]">
+        <div className="glass px-6 py-3 rounded-xl border border-white/40 shadow-sm backdrop-blur-md">
+          <p className="font-mono text-xs text-charcoal font-medium">Building OpenEnv.</p>
+        </div>
+      </div>
+
+      {/* Right Photo Placeholder */}
+      <div className="absolute top-[35%] right-[10%] md:right-[15%] z-20 animate-[float_7s_ease-in-out_infinite_0.5s]">
+        <div className="w-40 h-56 md:w-48 md:h-64 glass rounded-2xl border border-white/40 shadow-lg backdrop-blur-md overflow-hidden flex items-center justify-center p-2">
+           <div className="w-full h-full bg-graylight/20 rounded-xl relative overflow-hidden">
+             <Image src="/my_profile.png" alt="Profile" fill className="object-cover object-top opacity-80" />
+           </div>
+        </div>
+      </div>
+
+      {/* Bottom Right Quote */}
+      <div className="absolute bottom-[20%] right-[15%] md:right-[25%] z-20 animate-[float_5.5s_ease-in-out_infinite_1.5s]">
+        <div className="glass px-6 py-4 rounded-xl border border-white/40 shadow-sm backdrop-blur-md max-w-[250px]">
+          <p className="font-serif italic text-xs text-charcoal/80">
+            "Little by little, we gave you everything you ever dreamed of." — Oasis
+          </p>
+        </div>
+      </div>
+
+    </section>
   );
 }
-

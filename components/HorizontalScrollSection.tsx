@@ -33,7 +33,6 @@ export default function HorizontalScrollSection({
         start: "top top",
         end: () => "+=" + (wrap.offsetHeight - window.innerHeight),
         scrub: 0.6,
-        pin: wrap.querySelector(".pin-track"),
       },
     });
 

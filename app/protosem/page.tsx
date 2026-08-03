@@ -1,50 +1,26 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useState } from "react";
 import protosemData from "@/data/protosem.json";
 import Footer from "@/components/Footer";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+type WeekData = {
+  week: number;
+  title: string;
+  status: string;
+  details: string[];
+};
 
 export default function ProtosemPage() {
   const currentWeek = 1;
   const totalWeeks = 20;
 
-  const lineRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    let ctx = gsap.context(() => {
-      // Draw the progress line
-      const weeks = gsap.utils.toArray<HTMLElement>(".week-section");
-      weeks.forEach((week) => {
-        gsap.fromTo(week, 
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.7,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: week,
-              start: "top 82%",
-            }
-          }
-        );
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
+  const [selectedWeek, setSelectedWeek] = useState<WeekData | null>(null);
 
   return (
     <div className="pt-32 pb-24 min-h-screen bg-offwhite">
-      <div className="max-w-2xl mx-auto px-6">
-
+      <div className="max-w-4xl mx-auto px-6">
+        
         {/* Header */}
         <div className="text-center mb-16 animate-[fadeIn_1s_ease-out_forwards]">
           <div className="inline-block font-mono text-xs tracking-[0.15em] uppercase text-graymid mb-4 px-3 py-1 glass rounded-full">
@@ -59,7 +35,7 @@ export default function ProtosemPage() {
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-20 glass rounded-2xl p-6 opacity-0 animate-[fadeIn_1s_ease-out_0.4s_forwards]">
+        <div className="mb-16 glass rounded-2xl p-6 opacity-0 animate-[fadeIn_1s_ease-out_0.4s_forwards]">
           <div className="flex justify-between text-xs font-mono text-graymid mb-3 uppercase tracking-widest">
             <span>Week {currentWeek} of {totalWeeks}</span>
             <span>{Math.round((currentWeek / totalWeeks) * 100)}% complete</span>
@@ -75,51 +51,82 @@ export default function ProtosemPage() {
           </div>
         </div>
 
-        {/* Timeline */}
-        <div ref={containerRef} className="relative ml-2 pl-6 md:pl-10">
+        {/* Weeks Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-[slideUp_1s_ease-out_0.6s_forwards] opacity-0">
+          {protosemData.map((week) => (
+            <button
+              key={week.week}
+              onClick={() => setSelectedWeek(week)}
+              className="group glass rounded-2xl p-6 text-left hover:bg-white/60 transition-all border border-graylight/30 hover:border-graymid/40 hover:-translate-y-1 hover:shadow-lg flex flex-col"
+            >
+              <span className="font-mono text-[10px] text-graymid uppercase tracking-widest mb-3">
+                Week {week.week}
+              </span>
+              <span className="font-display text-lg text-charcoal leading-tight">
+                {week.title}
+              </span>
+              <span className="text-graymid text-xs font-mono mt-auto pt-6 group-hover:text-charcoal transition-colors">
+                View log &rarr;
+              </span>
+            </button>
+          ))}
           
-          {/* Track */}
-          <div className="absolute top-0 left-0 w-[1px] h-full bg-graylight/40 border-l border-dashed border-graymid/20" />
-          <div ref={lineRef} className="absolute top-0 left-0 w-[2px] bg-charcoal origin-top" />
-
-          <div className="space-y-20 py-8">
-            {protosemData.map((week) => (
-              <div key={week.week} className="week-section relative">
-                <span className="absolute -left-[31px] md:-left-[45px] top-1 w-3 h-3 rounded-full bg-charcoal border-[3px] border-offwhite shadow-sm z-10" />
-                
-                <div className="text-[10px] tracking-[0.12em] uppercase text-graymid mb-1.5 font-mono">
-                  Week {week.week}
-                </div>
-                <h3 className="text-xl md:text-2xl font-display text-charcoal mb-4">
-                  {week.title}
-                </h3>
-                <div className="glass rounded-xl p-5">
-                  <ul className="space-y-2.5">
-                    {week.details.map((detail, idx) => (
-                      <li key={idx} className="flex gap-3 items-start text-charcoal/75 text-sm md:text-base leading-relaxed font-body">
-                        <span className="text-graylight shrink-0 mt-0.5">›</span>
-                        {detail}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+          {/* Empty placeholders for upcoming weeks to show scale */}
+          {Array.from({ length: totalWeeks - protosemData.length }).map((_, idx) => {
+            const w = protosemData.length + idx;
+            return (
+              <div
+                key={`empty-${w}`}
+                className="glass rounded-2xl p-6 text-left opacity-30 border border-transparent flex flex-col justify-center items-center"
+              >
+                <span className="font-mono text-[10px] text-graymid uppercase tracking-widest mb-2">
+                  Week {w}
+                </span>
+                <span className="font-mono text-xs italic text-graymid">Locked</span>
               </div>
-            ))}
-
-            {/* The unknown */}
-            <div className="week-section relative opacity-40 pt-4">
-              <span className="absolute -left-[28px] md:-left-[42px] top-5 w-2.5 h-2.5 rounded-full bg-graylight border-[2px] border-offwhite z-10" />
-              <p className="text-sm font-mono text-graymid italic">
-                Yet to figure out...
-              </p>
-            </div>
-          </div>
+            );
+          })}
         </div>
+
       </div>
 
       <div className="mt-32">
         <Footer />
       </div>
+
+      {/* Modal Overlay */}
+      {selectedWeek && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-offwhite/80 backdrop-blur-sm cursor-pointer transition-opacity" 
+            onClick={() => setSelectedWeek(null)} 
+          />
+          <div className="relative glass border border-white/60 shadow-2xl rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-8 animate-[slideUp_0.3s_ease-out_forwards]">
+            <button 
+              onClick={() => setSelectedWeek(null)}
+              className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-charcoal/5 hover:bg-charcoal/10 transition-colors text-charcoal font-mono"
+            >
+              ✕
+            </button>
+            <div className="font-mono text-xs tracking-[0.15em] text-graymid uppercase mb-3">
+              Week {selectedWeek.week}
+            </div>
+            <h2 className="text-3xl font-display text-charcoal mb-8 pr-8">
+              {selectedWeek.title}
+            </h2>
+            <div className="space-y-4">
+              {selectedWeek.details.map((detail, idx) => (
+                <div key={idx} className="flex gap-4 items-start bg-white/40 rounded-2xl p-5 border border-white/40">
+                  <span className="text-graymid mt-0.5 font-mono text-sm">›</span>
+                  <p className="text-charcoal/80 text-sm leading-relaxed">
+                    {detail}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
