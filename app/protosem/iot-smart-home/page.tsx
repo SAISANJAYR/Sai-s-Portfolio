@@ -432,7 +432,7 @@ void loop() {
                   </div>
                 </div>
                 <div className="glass p-2 rounded-3xl border border-white/40">
-                  <video src="/media/dash_vid.mp4" autoPlay loop muted playsInline className="w-full rounded-2xl"></video>
+                  <video src="/media/ada_vid.mp4" autoPlay loop muted playsInline className="w-full rounded-2xl aspect-video"></video>
                 </div>
               </div>
 
@@ -486,7 +486,7 @@ void loop() {
                   <img src="/media/media__1790510820927.png" alt="System UI Dashboard" className="w-full rounded-2xl" />
                 </div>
                 <div className="glass p-2 rounded-3xl border border-white/40">
-                  <video src="/media/ada_vid.mp4" controls className="w-full rounded-2xl aspect-video"></video>
+                  <video src="/media/dash_vid.mp4" controls className="w-full rounded-2xl aspect-video"></video>
                 </div>
               </div>
 
