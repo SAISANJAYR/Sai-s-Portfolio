@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import protosemData from "@/data/protosem.json";
 import Footer from "@/components/Footer";
 
@@ -9,10 +10,12 @@ type WeekData = {
   title: string;
   status: string;
   details: string[];
+  embed?: string;
+  caseStudyLink?: string;
 };
 
 export default function ProtosemPage() {
-  const currentWeek = 1;
+  const currentWeek = 2; // Increased to 2 since we have week 2 completed
   const totalWeeks = 20;
 
   const [selectedWeek, setSelectedWeek] = useState<WeekData | null>(null);
@@ -56,7 +59,7 @@ export default function ProtosemPage() {
           {protosemData.map((week) => (
             <button
               key={week.week}
-              onClick={() => setSelectedWeek(week)}
+              onClick={() => setSelectedWeek(week as WeekData)}
               className="group glass rounded-2xl p-6 text-left hover:bg-white/60 transition-all border border-graylight/30 hover:border-graymid/40 hover:-translate-y-1 hover:shadow-lg flex flex-col"
             >
               <span className="font-mono text-[10px] text-graymid uppercase tracking-widest mb-3">
@@ -70,6 +73,22 @@ export default function ProtosemPage() {
               </span>
             </button>
           ))}
+          
+          {/* IoT Projects Card */}
+          <Link
+            href="/protosem/iot-smart-home"
+            className="group glass rounded-2xl p-6 text-left hover:bg-white/60 transition-all border border-graylight/30 hover:border-graymid/40 hover:-translate-y-1 hover:shadow-lg flex flex-col"
+          >
+            <span className="font-mono text-[10px] text-graymid uppercase tracking-widest mb-3">
+              Special Project
+            </span>
+            <span className="font-display text-lg text-charcoal leading-tight">
+              IoT-Projects
+            </span>
+            <span className="text-graymid text-xs font-mono mt-auto pt-6 group-hover:text-charcoal transition-colors">
+              View case study &rarr;
+            </span>
+          </Link>
           
           {/* Empty placeholders for upcoming weeks to show scale */}
           {Array.from({ length: totalWeeks - protosemData.length }).map((_, idx) => {
@@ -101,7 +120,7 @@ export default function ProtosemPage() {
             className="absolute inset-0 bg-offwhite/80 backdrop-blur-sm cursor-pointer transition-opacity" 
             onClick={() => setSelectedWeek(null)} 
           />
-          <div className="relative glass border border-white/60 shadow-2xl rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-8 animate-[slideUp_0.3s_ease-out_forwards]">
+          <div id="modal-content" className="relative glass border border-white/60 shadow-2xl rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto p-8 animate-[slideUp_0.3s_ease-out_forwards]">
             <button 
               onClick={() => setSelectedWeek(null)}
               className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-charcoal/5 hover:bg-charcoal/10 transition-colors text-charcoal font-mono"
@@ -124,6 +143,21 @@ export default function ProtosemPage() {
                 </div>
               ))}
             </div>
+
+            {selectedWeek.embed && (
+              <div className="mt-8 flex justify-center w-full bg-white/40 rounded-2xl overflow-hidden border border-white/40 p-2">
+                <iframe 
+                  src={selectedWeek.embed} 
+                  allowTransparency={true} 
+                  width="485" 
+                  height="402" 
+                  frameBorder="0" 
+                  scrolling="no" 
+                  allowFullScreen 
+                  className="rounded-xl w-full max-w-[485px]"
+                ></iframe>
+              </div>
+            )}
           </div>
         </div>
       )}
