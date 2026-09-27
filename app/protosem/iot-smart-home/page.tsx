@@ -211,8 +211,17 @@ void loop() {
                   <li>Configured HTTP server listening on standard port 80.</li>
                   <li>Defined route handlers for HTTP GET '/' and '/led/on' endpoints.</li>
                 </ol>
-                <div className="glass p-2 rounded-3xl shadow-sm border border-white/40">
-                  <img src="/media/html_led_control.png" alt="ESP32 Web Server Control UI" className="w-full rounded-2xl object-cover border border-white/20" />
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790485667/IMG-20260923-WA0068.jpg" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
+                  </div>
+                  <div className="glass p-2 rounded-3xl border border-white/40">
+                    <div className="relative w-full rounded-2xl overflow-hidden aspect-video">
+                      <iframe src="https://player.vimeo.com/video/1230618706?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" title="Task 01 Video" className="absolute inset-0 w-full h-full border-0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" allowFullScreen></iframe>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -308,12 +317,19 @@ void loop() {
 }`}
                   </pre>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="glass p-2 rounded-3xl border border-white/40">
-                    <img src="/media/media__1790510641197.png" alt="Adafruit IO Dashboard" className="w-full rounded-2xl h-full object-cover" />
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790485668/IMG-20260923-WA0070.jpg" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790485667/IMG-20260923-WA0071.jpg" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
                   </div>
                   <div className="glass p-2 rounded-3xl border border-white/40">
-                    <img src="/media/relay.jpeg" alt="Relay Module" className="w-full rounded-2xl h-full object-cover" />
+                    <div className="relative w-full rounded-2xl overflow-hidden aspect-video">
+                      <iframe src="https://player.vimeo.com/video/1230618703?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" title="Task 02 Video" className="absolute inset-0 w-full h-full border-0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" allowFullScreen></iframe>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -352,8 +368,17 @@ curl -X POST https://maker.ifttt.com/trigger/YOUR_EVENT_NAME/with/key/YOUR_IFTTT
   -d '{"value1":"ON"}'`}
                   </pre>
                 </div>
-                <div className="glass p-2 rounded-3xl shadow-sm border border-white/40">
-                  <video src="/media/voice.mp4" controls className="w-full rounded-2xl aspect-video object-cover"></video>
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790486672/Screenshot_from_2026-09-27_10-52-12.png" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
+                  </div>
+                  <div className="glass p-2 rounded-3xl border border-white/40 max-w-[340px] mx-auto w-full">
+                    <div className="relative w-full rounded-2xl overflow-hidden aspect-[9/16]">
+                      <iframe src="https://player.vimeo.com/video/1230618705?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" title="Task 03 Video" className="absolute inset-0 w-full h-full border-0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" allowFullScreen></iframe>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -423,16 +448,18 @@ void loop() {
 }`}
                   </pre>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div className="glass p-2 rounded-3xl border border-white/40">
-                    <img src="/media/media__1790510951506.png" alt="Firebase RTDB" className="w-full rounded-2xl h-full object-cover" />
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790485835/Screenshot_from_2026-09-27_10-38-09.png" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790485834/Screenshot_from_2026-09-27_10-38-58.png" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790485835/Screenshot_from_2026-09-27_10-39-10.png" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
                   </div>
-                  <div className="glass p-2 rounded-3xl border border-white/40">
-                    <img src="/media/f1.jpeg" alt="Hardware Prototype" className="w-full rounded-2xl h-full object-cover" />
-                  </div>
-                </div>
-                <div className="glass p-2 rounded-3xl border border-white/40">
-                  <video src="/media/ada_vid.mp4" autoPlay loop muted playsInline className="w-full rounded-2xl aspect-video"></video>
                 </div>
               </div>
 
@@ -482,11 +509,20 @@ void loop() {
 }`}
                   </pre>
                 </div>
-                <div className="glass p-2 rounded-3xl border border-white/40 mb-4">
-                  <img src="/media/media__1790510820927.png" alt="System UI Dashboard" className="w-full rounded-2xl" />
-                </div>
-                <div className="glass p-2 rounded-3xl border border-white/40">
-                  <video src="/media/dash_vid.mp4" controls className="w-full rounded-2xl aspect-video"></video>
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790485835/Screenshot_from_2026-09-27_10-39-51.png" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
+                    <div className="glass p-2 rounded-3xl border border-white/40">
+                      <img src="https://res.cloudinary.com/g52yuts7/image/upload/v1790485835/Screenshot_from_2026-09-27_10-39-58.png" alt="Evidence" className="w-full rounded-2xl h-full object-cover" />
+                    </div>
+                  </div>
+                  <div className="glass p-2 rounded-3xl border border-white/40">
+                    <div className="relative w-full rounded-2xl overflow-hidden aspect-video">
+                      <iframe src="https://player.vimeo.com/video/1230618704?title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479" title="Task 05 Video" className="absolute inset-0 w-full h-full border-0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media" allowFullScreen></iframe>
+                    </div>
+                  </div>
                 </div>
               </div>
 
