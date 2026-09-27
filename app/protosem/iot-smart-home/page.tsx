@@ -1,44 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import Footer from "@/components/Footer";
 
 export default function IoTSmartHomeCaseStudy() {
   return (
-    <div className="min-h-screen bg-offwhite">
-      <div className="pt-32 pb-24">
-        <div className="max-w-4xl mx-auto px-6">
-          
-          {/* Breadcrumb */}
-          <Link href="/protosem" className="inline-flex items-center text-sm font-mono text-graymid hover:text-charcoal transition-colors mb-12 group">
-            <span className="group-hover:-translate-x-1 transition-transform mr-2">←</span> Back to Protosem Logs
-          </Link>
+    <div className="min-h-screen bg-[#0a0b0e] text-slate-300 font-sans selection:bg-sky-500/30">
+      
+      {/* Background Glows */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-sky-500/10 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-sky-900/10 rounded-full blur-[100px]"></div>
+      </div>
 
-          {/* Title Section */}
-          <div className="mb-16 animate-[fadeIn_1s_ease-out_forwards]">
-            <div className="inline-block font-mono text-xs tracking-[0.15em] uppercase text-graymid mb-4 px-3 py-1 glass rounded-full">
-              Protosem Progress Log · Week 07
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 pb-32 space-y-16">
+        
+        {/* Header Navigation */}
+        <div className="flex items-center justify-between gap-4">
+          <Link href="/protosem" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sky-400 text-xs font-semibold uppercase tracking-wider hover:border-sky-400/50 transition-all duration-200">
+            ← Back to Protosem Logs
+          </Link>
+          <span className="text-xs font-mono text-slate-500">Protosem Progress Log · Week 07</span>
+        </div>
+
+        {/* Hero Section */}
+        <header className="rounded-3xl p-8 sm:p-12 border border-white/10 bg-white/5 space-y-8 shadow-2xl relative overflow-hidden backdrop-blur-sm">
+          <div className="space-y-4 max-w-3xl relative z-10">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-mono uppercase tracking-widest font-bold">
+              WEEK 07
             </div>
-            <h1 className="text-4xl md:text-5xl font-display text-charcoal mb-4 leading-tight">
-              IoT & Embedded Systems
-            </h1>
-            <p className="text-2xl text-graymid mb-8 font-serif italic">
-              From Prototype to Production
-            </p>
-            <p className="text-charcoal/80 leading-relaxed text-lg">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white">IoT & Embedded Systems</h1>
+            <p className="text-xl sm:text-2xl font-bold text-sky-400">From Prototype to Production</p>
+            <p className="text-sm sm:text-base text-slate-400 leading-relaxed pt-2">
               Explored IoT and embedded systems through a series of ESP32-based assignments involving local HTTP web control, MQTT and Adafruit IO cloud integration, IFTTT event automation, Firebase Realtime Database dashboards, multi-sensor telemetry, relay control, time-series data logging, and CSV data export.
             </p>
           </div>
 
-          {/* Architectural Evolution */}
-          <section className="mb-20">
-            <div className="flex items-center gap-4 mb-8">
-              <span className="font-mono text-sm text-graymid animate-pulse">⚡</span>
-              <h2 className="text-xl font-mono uppercase tracking-widest text-charcoal">Architectural Evolution</h2>
-              <div className="flex-1 h-px bg-graylight/30"></div>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="space-y-4 pt-6 border-t border-white/10 relative z-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              Architectural Evolution
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
               {[
                 { num: "01", title: "ESP32", sub: "Microcontroller Board" },
                 { num: "02", title: "HTTP Server", sub: "Local Web Control" },
@@ -48,117 +49,105 @@ export default function IoTSmartHomeCaseStudy() {
                 { num: "06", title: "Sensors & Relay", sub: "Hardware Telemetry" },
                 { num: "07", title: "Data Logging", sub: "CSV Analytics Export" },
               ].map((step, i) => (
-                <div key={i} className="glass p-5 rounded-2xl border border-white/40 flex flex-col items-center text-center hover:bg-white/60 transition-colors">
-                  <span className="text-xs font-mono text-graymid mb-2">{step.num}</span>
-                  <h3 className="font-display text-sm text-charcoal mb-1">{step.title}</h3>
-                  <p className="text-[10px] text-graymid font-mono">{step.sub}</p>
+                <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/10 text-center space-y-1 hover:border-sky-500/50 transition-colors">
+                  <span className="text-[10px] font-mono font-bold text-sky-400 block">{step.num}</span>
+                  <span className="text-xs font-bold text-white block truncate">{step.title}</span>
+                  <span className="text-[9px] text-slate-400 block truncate">{step.sub}</span>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
+        </header>
 
-          {/* Tasks Navigation */}
-          <section className="mb-20 glass p-4 rounded-full border border-white/40 overflow-x-auto hide-scrollbar">
-            <div className="flex gap-2 min-w-max">
-              {[
-                { id: "Task 01", name: "ESP32 Web Server" },
-                { id: "Task 02", name: "Adafruit IO Dashboard" },
-                { id: "Task 03", name: "IFTTT + Adafruit IO" },
-                { id: "Task 04", name: "Firebase Dashboard" },
-                { id: "Task 05", name: "Logging & Automation" },
-              ].map((t, i) => (
-                <a key={i} href={`#task${i+1}`} className="px-5 py-2.5 rounded-full text-xs font-mono bg-white/40 hover:bg-charcoal hover:text-white transition-all text-charcoal/80 flex items-center gap-2">
-                  <span className="opacity-50">{t.id}</span>
-                  <span>{t.name}</span>
-                </a>
-              ))}
+        {/* Tasks Navigation */}
+        <nav className="sticky top-6 z-40 w-full rounded-2xl p-2 sm:p-3 border border-white/10 bg-[#0a0b0e]/80 backdrop-blur-md shadow-xl my-8">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1">
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-sky-400 shrink-0 border-r border-white/10 mr-1">
+              Tasks Navigation
             </div>
-          </section>
+            {[
+              { id: "Task 01", name: "ESP32 Web Server", href: "#task-01" },
+              { id: "Task 02", name: "Adafruit IO Dashboard", href: "#task-02" },
+              { id: "Task 03", name: "IFTTT + Adafruit IO", href: "#task-03" },
+              { id: "Task 04", name: "Firebase Dashboard", href: "#task-04" },
+              { id: "Task 05", name: "Logging & Automation", href: "#task-05" },
+            ].map((t, i) => (
+              <a key={i} href={t.href} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 shrink-0 bg-white/5 text-slate-300 border border-white/10 hover:text-white hover:border-sky-500/40">
+                <span className="font-mono text-[10px] opacity-80">{t.id}</span>
+                <span className="truncate">{t.name}</span>
+              </a>
+            ))}
+          </div>
+        </nav>
 
-          {/* Project Overview */}
-          <section className="mb-24">
-            <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-xl font-mono uppercase tracking-widest text-charcoal">Project Overview & Methodological Progression</h2>
-              <div className="flex-1 h-px bg-graylight/30"></div>
+        {/* Project Overview */}
+        <section className="rounded-2xl p-6 sm:p-8 border border-white/10 bg-white/5 space-y-4 shadow-xl">
+          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+            <h2 className="text-sm font-bold text-sky-400 uppercase tracking-wider">Project Overview & Methodological Progression</h2>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+            The IoT & Embedded Systems module was structured around a hands-on, step-by-step progression of ESP32 assignments. Rather than jumping straight into complex cloud platforms, the work began with low-level local HTTP socket programming to grasp client-server request cycles. It then transitioned to lightweight publish-subscribe protocols (MQTT via Adafruit IO) for cloud telemetry, event-driven webhooks with IFTTT, and finally full-stack real-time database integration using Google Firebase. Each task added a critical piece of IoT architecture — moving from simple LED control to multi-sensor telemetry, relay load actuation, dual manual/automatic operational modes, and browser-based CSV analytics data export.
+          </p>
+        </section>
+
+        {/* TASK 01 */}
+        <section id="task-01" className="rounded-2xl p-6 sm:p-10 border border-white/10 bg-white/5 space-y-10 shadow-2xl scroll-mt-36">
+          <div className="space-y-3 border-b border-white/10 pb-6">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-md bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-mono font-bold tracking-wider uppercase">Task 01</span>
+              <span className="text-xs text-slate-400 font-medium">Local Wi-Fi Embedded HTTP Server</span>
             </div>
-            <p className="text-charcoal/80 leading-relaxed bg-white/40 p-8 rounded-3xl border border-white/60 shadow-sm">
-              The IoT & Embedded Systems module was structured around a hands-on, step-by-step progression of ESP32 assignments. Rather than jumping straight into complex cloud platforms, the work began with low-level local HTTP socket programming to grasp client-server request cycles. It then transitioned to lightweight publish-subscribe protocols (MQTT via Adafruit IO) for cloud telemetry, event-driven webhooks with IFTTT, and finally full-stack real-time database integration using Google Firebase. Each task added a critical piece of IoT architecture — moving from simple LED control to multi-sensor telemetry, relay load actuation, dual manual/automatic operational modes, and browser-based CSV analytics data export.
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">ESP32 Web Server & HTML LED Control</h2>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">1. Overview</h3>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed bg-[#0a0b0e]/50 p-5 rounded-xl border border-white/5">
+              Established a local Wi-Fi HTTP web server directly on the ESP32 microcontroller. The system hosts an interactive HTML interface in memory, allowing client web browsers connected to the same local network to toggle GPIO outputs and control an LED in real time without external cloud dependencies.
             </p>
-          </section>
+          </div>
 
-          {/* TASK 01 */}
-          <section id="task1" className="mb-32">
-            <div className="mb-8">
-              <span className="font-mono text-sm text-graymid block mb-2">Task 01</span>
-              <h2 className="text-3xl font-display text-charcoal mb-2">Local Wi-Fi Embedded HTTP Server</h2>
-              <p className="text-graymid font-serif italic">ESP32 Web Server & HTML LED Control</p>
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">2. Key Technical Concepts</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { t: "ESP32", d: "A low-cost, low-power system-on-a-chip (SoC) microcontroller with integrated Wi-Fi." },
+                { t: "Wi-Fi Networking", d: "Wireless networking protocol enabling the ESP32 to join an AP." },
+                { t: "HTTP Protocol", d: "Application-layer protocol for transmitting web documents over TCP sockets." },
+                { t: "Client/Server Architecture", d: "Client browsers initiate requests, ESP32 server executes commands." },
+                { t: "Request/Response Cycle", d: "Standard HTTP loop where GET/POST requests trigger GPIO state changes." },
+                { t: "REST-style Endpoints", d: "Explicit URL routes mapped to specific digital output functions." },
+                { t: "GPIO", d: "Digital pins on the microcontroller configured to drive signals HIGH/LOW." }
+              ].map((c, i) => (
+                <div key={i} className="p-4 rounded-xl bg-[#0a0b0e]/50 border border-white/5 space-y-1.5 hover:border-sky-500/40 transition-colors">
+                  <h4 className="text-xs font-bold text-white">{c.t}</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">{c.d}</p>
+                </div>
+              ))}
             </div>
-            
-            <div className="space-y-12">
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">1. Overview</h3>
-                <p className="text-charcoal/80 leading-relaxed">Established a local Wi-Fi HTTP web server directly on the ESP32 microcontroller. The system hosts an interactive HTML interface in memory, allowing client web browsers connected to the same local network to toggle GPIO outputs and control an LED in real time without external cloud dependencies.</p>
-              </div>
+          </div>
 
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">2. Key Technical Concepts</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {[
-                    { t: "ESP32", d: "Low-cost, low-power system-on-a-chip (SoC) microcontroller with integrated Wi-Fi." },
-                    { t: "Wi-Fi Networking", d: "Wireless networking protocol enabling the ESP32 to join an AP." },
-                    { t: "HTTP Protocol", d: "Application-layer protocol for transmitting web documents over TCP sockets." },
-                    { t: "Client/Server Architecture", d: "Client browsers initiate requests, ESP32 server executes commands." },
-                    { t: "Request/Response Cycle", d: "Standard HTTP loop where GET/POST requests trigger GPIO state changes." },
-                    { t: "REST-style Endpoints", d: "Explicit URL routes mapped to specific digital output functions." },
-                    { t: "GPIO", d: "Digital pins on the microcontroller configured to drive signals HIGH/LOW." }
-                  ].map((c, i) => (
-                    <div key={i} className="glass p-5 rounded-2xl border border-white/40">
-                      <h4 className="font-mono text-xs font-semibold text-charcoal mb-2">{c.t}</h4>
-                      <p className="text-sm text-charcoal/70">{c.d}</p>
-                    </div>
-                  ))}
-                </div>
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">3. System Design & Data Flow</h3>
+            <div className="rounded-xl p-5 border border-white/10 bg-white/5 space-y-4 shadow-lg">
+              <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3 overflow-x-auto py-2">
+                {["Client Web Browser", "HTTP Request (Wi-Fi)", "ESP32 Web Server", "GPIO Pin Control", "LED Output"].map((step, idx) => (
+                  <div key={idx} className="flex-1 min-w-[130px] p-3 rounded-xl bg-[#0a0b0e] border border-white/10 text-center space-y-1 hover:border-sky-500/50 transition-all shadow-sm group">
+                    <span className="text-[10px] font-mono font-bold text-sky-400 block">STEP 0{idx+1}</span>
+                    <span className="text-xs font-semibold text-white block group-hover:text-sky-400 transition-colors leading-snug">{step}</span>
+                  </div>
+                ))}
               </div>
+            </div>
+          </div>
 
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">3. System Design & Data Flow</h3>
-                <div className="glass p-6 rounded-3xl border border-white/40 text-center font-mono text-xs flex flex-wrap justify-center items-center gap-2">
-                  <span className="px-3 py-1.5 bg-white rounded-full shadow-sm">Client Web Browser</span><span>→</span>
-                  <span className="px-3 py-1.5 bg-white rounded-full shadow-sm">HTTP Request (Wi-Fi)</span><span>→</span>
-                  <span className="px-3 py-1.5 bg-charcoal text-white rounded-full">ESP32 Web Server</span><span>→</span>
-                  <span className="px-3 py-1.5 bg-white rounded-full shadow-sm">GPIO Pin Control</span><span>→</span>
-                  <span className="px-3 py-1.5 bg-white rounded-full shadow-sm">LED Output</span>
-                </div>
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">6. Implementation Source Code</h3>
+            <div className="rounded-xl border border-white/10 overflow-hidden bg-[#0A0B0E] shadow-xl">
+              <div className="flex items-center justify-between gap-4 px-4 py-3 bg-white/5 border-b border-white/10">
+                <span className="text-xs font-mono font-bold text-white">esp32_web_server.ino</span>
               </div>
-
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">4. Hardware & Software Specifications</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { n: "ESP32 Dev Board", t: "Hardware", d: "NodeMCU / DevKit v1 microcontroller board." },
-                    { n: "Micro-USB Cable", t: "Hardware", d: "Provides 5V power and serial communication connection." },
-                    { n: "Wi-Fi Router", t: "Hardware", d: "2.4 GHz local wireless network access point." },
-                    { n: "Arduino IDE", t: "Software", d: "Development environment for writing C++ code." },
-                  ].map((s, i) => (
-                    <div key={i} className="bg-white/40 p-4 rounded-xl border border-white/60">
-                      <span className="text-[10px] uppercase tracking-widest text-graymid mb-1 block">{s.t}</span>
-                      <h4 className="font-semibold text-charcoal text-sm mb-1">{s.n}</h4>
-                      <p className="text-xs text-charcoal/70">{s.d}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">5. Wiring & Electrical Setup</h3>
-                <p className="text-charcoal/80 text-sm leading-relaxed">The ESP32 is powered via USB. For testing, the onboard blue LED attached to GPIO 2 was used. Alternatively, an external LED can be wired from GPIO 2 to a 220Ω current-limiting resistor, terminating at GND.</p>
-              </div>
-
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">6. Implementation Source Code</h3>
-                <div className="glass rounded-2xl border border-white/40 overflow-hidden">
-                  <div className="p-3 bg-white/40 border-b border-white/40 font-mono text-xs text-graymid">esp32_web_server.ino (C++)</div>
-                  <pre className="p-4 overflow-x-auto text-xs font-mono text-charcoal bg-white/20">
+              <pre className="p-4 overflow-x-auto text-xs sm:text-sm font-mono text-slate-300 leading-relaxed">
 {`#include <WiFi.h>
 #include <WebServer.h>
 
@@ -199,79 +188,55 @@ void setup() {
 void loop() {
   server.handleClient();
 }`}
-                  </pre>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">7. System Configuration & Setup Steps</h3>
-                <ol className="list-decimal pl-5 space-y-2 text-sm text-charcoal/80 mb-8">
-                  <li>Configured Wi-Fi SSID and Password in the C++ header configuration.</li>
-                  <li>Initialized Serial Monitor at 115200 baud to retrieve the dynamically assigned local IP address.</li>
-                  <li>Configured HTTP server listening on standard port 80.</li>
-                  <li>Defined route handlers for HTTP GET '/' and '/led/on' endpoints.</li>
-                </ol>
-                <div className="glass p-2 rounded-3xl shadow-sm border border-white/40">
-                  <img src="/media/html_led_control.png" alt="ESP32 Web Server Control UI" className="w-full rounded-2xl object-cover border border-white/20" />
-                </div>
-              </div>
+              </pre>
+            </div>
+          </div>
 
-              <div className="bg-charcoal text-offwhite p-8 rounded-3xl">
-                <h3 className="font-display text-xl mb-4 text-white">9. Reflection</h3>
-                <p className="font-serif italic text-white/80 leading-relaxed">
-                  "Building an embedded HTTP web server on the ESP32 provided practical insight into low-level socket handling and client/server architecture on memory-constrained microcontrollers. Controlling physical GPIO pins via HTTP requests demonstrated how standard web protocols bridge software interfaces and physical electronic hardware."
-                </p>
+          <div className="space-y-6 border-t border-white/10 pt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">8. Evidence</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <img src="/media/html_led_control.png" alt="HTML LED UI" className="w-full h-full object-cover" />
+                </div>
               </div>
             </div>
-          </section>
+          </div>
+          
+          <div className="space-y-3 bg-sky-900/20 p-5 rounded-xl border border-sky-500/30">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider">9. Reflection</h3>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed italic">
+              "Building an embedded HTTP web server on the ESP32 provided practical insight into low-level socket handling and client/server architecture on memory-constrained microcontrollers."
+            </p>
+          </div>
+        </section>
 
-          {/* TASK 02 */}
-          <section id="task2" className="mb-32">
-            <div className="mb-8">
-              <span className="font-mono text-sm text-graymid block mb-2">Task 02</span>
-              <h2 className="text-3xl font-display text-charcoal mb-2">Cloud Telemetry & Remote Relay Control</h2>
-              <p className="text-graymid font-serif italic">Adafruit IO Dashboard & MQTT Protocol</p>
+        {/* TASK 02 */}
+        <section id="task-02" className="rounded-2xl p-6 sm:p-10 border border-white/10 bg-white/5 space-y-10 shadow-2xl scroll-mt-36">
+          <div className="space-y-3 border-b border-white/10 pb-6">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-md bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-mono font-bold tracking-wider uppercase">Task 02</span>
+              <span className="text-xs text-slate-400 font-medium">Cloud Telemetry & Remote Relay Control</span>
             </div>
-            
-            <div className="space-y-12">
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">1. Overview</h3>
-                <p className="text-charcoal/80 leading-relaxed">Moved beyond local network boundaries by connecting the ESP32 to the Adafruit IO cloud platform using the MQTT protocol. This architecture enables secure bidirectional communication over the internet, allowing remote users to toggle an optocoupler-isolated relay module connected to a light bulb.</p>
-              </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">Adafruit IO Dashboard & MQTT Protocol</h2>
+          </div>
 
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">2. Key Technical Concepts</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {[
-                    { t: "MQTT Protocol", d: "Lightweight publish-subscribe messaging protocol for IoT." },
-                    { t: "MQTT Broker", d: "Central cloud server that distributes messages to subscribers." },
-                    { t: "Publisher / Subscriber", d: "Decoupled roles sending data to topics and listening asynchronously." },
-                    { t: "Relay Isolation", d: "Optocoupler mechanism isolating 3.3V logic from higher voltage loads." }
-                  ].map((c, i) => (
-                    <div key={i} className="glass p-5 rounded-2xl border border-white/40">
-                      <h4 className="font-mono text-xs font-semibold text-charcoal mb-2">{c.t}</h4>
-                      <p className="text-sm text-charcoal/70">{c.d}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">1. Overview</h3>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed bg-[#0a0b0e]/50 p-5 rounded-xl border border-white/5">
+              Moved beyond local network boundaries by connecting the ESP32 to the Adafruit IO cloud platform using the MQTT protocol. This architecture enables secure bidirectional communication over the internet, allowing remote users to toggle an optocoupler-isolated relay module connected to a light bulb.
+            </p>
+          </div>
 
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">3. System Design & Data Flow</h3>
-                <div className="glass p-6 rounded-3xl border border-white/40 text-center font-mono text-xs flex flex-wrap justify-center items-center gap-2">
-                  <span className="px-3 py-1.5 bg-white rounded-full">Adafruit Dashboard</span><span>→</span>
-                  <span className="px-3 py-1.5 bg-charcoal text-white rounded-full">Cloud Broker</span><span>→</span>
-                  <span className="px-3 py-1.5 bg-white rounded-full">MQTT (TLS/TCP)</span><span>→</span>
-                  <span className="px-3 py-1.5 bg-white rounded-full">ESP32</span><span>→</span>
-                  <span className="px-3 py-1.5 bg-white rounded-full">Relay Module</span>
-                </div>
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">6. Implementation Source Code</h3>
+            <div className="rounded-xl border border-white/10 overflow-hidden bg-[#0A0B0E] shadow-xl">
+              <div className="flex items-center justify-between gap-4 px-4 py-3 bg-white/5 border-b border-white/10">
+                <span className="text-xs font-mono font-bold text-white">esp32_adafruit_mqtt.ino</span>
               </div>
-
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">6. Implementation Source Code</h3>
-                <div className="glass rounded-2xl border border-white/40 overflow-hidden mb-8">
-                  <div className="p-3 bg-white/40 border-b border-white/40 font-mono text-xs text-graymid">esp32_adafruit_mqtt.ino</div>
-                  <pre className="p-4 overflow-x-auto text-xs font-mono text-charcoal bg-white/20">
+              <pre className="p-4 overflow-x-auto text-xs sm:text-sm font-mono text-slate-300 leading-relaxed">
 {`#include <WiFi.h>
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
@@ -306,99 +271,79 @@ void loop() {
     }
   }
 }`}
-                  </pre>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="glass p-2 rounded-3xl border border-white/40">
-                    <img src="/media/media__1790510641197.png" alt="Adafruit IO Dashboard" className="w-full rounded-2xl h-full object-cover" />
-                  </div>
-                  <div className="glass p-2 rounded-3xl border border-white/40">
-                    <img src="/media/relay.jpeg" alt="Relay Module" className="w-full rounded-2xl h-full object-cover" />
-                  </div>
+              </pre>
+            </div>
+          </div>
+
+          <div className="space-y-6 border-t border-white/10 pt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">8. Evidence</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <img src="/media/media__1790510641197.png" alt="Adafruit IO Dashboard" className="w-full h-full object-cover" />
                 </div>
               </div>
-
-              <div className="bg-charcoal text-offwhite p-8 rounded-3xl">
-                <h3 className="font-display text-xl mb-4 text-white">9. Reflection</h3>
-                <p className="font-serif italic text-white/80 leading-relaxed">
-                  "Migrating from HTTP to MQTT highlighted the efficiency of publish-subscribe architectures for IoT applications. MQTT drastically reduces network overhead and power consumption compared to HTTP polling, while Adafruit IO provided a seamless bridge for cloud-to-device telemetry."
-                </p>
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <img src="/media/relay.jpeg" alt="Relay Module" className="w-full h-full object-cover" />
+                </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* TASK 03 */}
-          <section id="task3" className="mb-32">
-            <div className="mb-8">
-              <span className="font-mono text-sm text-graymid block mb-2">Task 03</span>
-              <h2 className="text-3xl font-display text-charcoal mb-2">Event-Driven Cloud Workflows</h2>
-              <p className="text-graymid font-serif italic">IFTTT + Adafruit IO IoT Automation</p>
+
+        {/* TASK 03 */}
+        <section id="task-03" className="rounded-2xl p-6 sm:p-10 border border-white/10 bg-white/5 space-y-10 shadow-2xl scroll-mt-36">
+          <div className="space-y-3 border-b border-white/10 pb-6">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-md bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-mono font-bold tracking-wider uppercase">Task 03</span>
+              <span className="text-xs text-slate-400 font-medium">Event-Driven Cloud Workflows</span>
             </div>
-            
-            <div className="space-y-12">
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">1. Overview</h3>
-                <p className="text-charcoal/80 leading-relaxed">Integrated IFTTT (If This Then That) with Adafruit IO to establish event-driven IoT automations. By configuring HTTP webhooks and applets, external triggers automatically publish payload messages to Adafruit IO MQTT feeds, instructing the ESP32 to actuate connected hardware without human manual intervention.</p>
-              </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">IFTTT + Adafruit IO IoT Automation</h2>
+          </div>
 
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">6. Implementation Source Code & Demonstration</h3>
-                <div className="glass rounded-2xl border border-white/40 overflow-hidden mb-8">
-                  <div className="p-3 bg-white/40 border-b border-white/40 font-mono text-xs text-graymid">ifttt_webhook_trigger.sh (Bash)</div>
-                  <pre className="p-4 overflow-x-auto text-xs font-mono text-charcoal bg-white/20">
-{`# Triggering IFTTT Webhook via HTTP POST
-curl -X POST https://maker.ifttt.com/trigger/YOUR_EVENT_NAME/with/key/YOUR_IFTTT_KEY \\
-  -H "Content-Type: application/json" \\
-  -d '{"value1":"ON"}'`}
-                  </pre>
-                </div>
-                <div className="glass p-2 rounded-3xl shadow-sm border border-white/40">
-                  <video src="/media/voice.mp4" controls className="w-full rounded-2xl aspect-video object-cover"></video>
-                </div>
-              </div>
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">1. Overview</h3>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed bg-[#0a0b0e]/50 p-5 rounded-xl border border-white/5">
+              Integrated IFTTT (If This Then That) with Adafruit IO to establish event-driven IoT automations. By configuring HTTP webhooks and applets, external triggers automatically publish payload messages to Adafruit IO MQTT feeds.
+            </p>
+          </div>
 
-              <div className="bg-charcoal text-offwhite p-8 rounded-3xl">
-                <h3 className="font-display text-xl mb-4 text-white">9. Reflection</h3>
-                <p className="font-serif italic text-white/80 leading-relaxed">
-                  "Integrating IFTTT with Adafruit IO demonstrated the power of webhooks and event-driven workflows in IoT. Decoupling hardware execution from cloud trigger engines makes it straightforward to introduce voice control or rule-based automation without changing embedded microcontroller firmware."
-                </p>
-              </div>
+          <div className="space-y-6 border-t border-white/10 pt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">8. Evidence</h3>
             </div>
-          </section>
-
-          {/* TASK 04 */}
-          <section id="task4" className="mb-32">
-            <div className="mb-8">
-              <span className="font-mono text-sm text-graymid block mb-2">Task 04</span>
-              <h2 className="text-3xl font-display text-charcoal mb-2">Real-Time Cloud Telemetry & Responsive Web UI</h2>
-              <p className="text-graymid font-serif italic">Firebase IoT Monitoring Dashboard</p>
-            </div>
-            
-            <div className="space-y-12">
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">1. Overview</h3>
-                <p className="text-charcoal/80 leading-relaxed">Developed a full-stack IoT telemetry system where the ESP32 streams real-time environmental data (DHT11 temperature/humidity and LDR light level) to Google Firebase Realtime Database. A custom web dashboard visualizes the data instantly and provides bidirectional relay control.</p>
-              </div>
-
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">2. Key Technical Concepts</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="glass p-5 rounded-2xl border border-white/40">
-                    <h4 className="font-mono text-xs font-semibold text-charcoal mb-2">BaaS (Backend-as-a-Service)</h4>
-                    <p className="text-sm text-charcoal/70">Cloud model providing database, authentication, and hosting infrastructure out of the box.</p>
-                  </div>
-                  <div className="glass p-5 rounded-2xl border border-white/40">
-                    <h4 className="font-mono text-xs font-semibold text-charcoal mb-2">Firebase Realtime Database</h4>
-                    <p className="text-sm text-charcoal/70">A cloud-hosted NoSQL JSON database that synchronizes data across connected clients in real time via WebSockets.</p>
-                  </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <video src="/media/voice.mp4" controls className="w-full h-full object-cover" />
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
 
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">6. Implementation Source Code & Dashboard</h3>
-                <div className="glass rounded-2xl border border-white/40 overflow-hidden mb-8">
-                  <div className="p-3 bg-white/40 border-b border-white/40 font-mono text-xs text-graymid">esp32_firebase_telemetry.ino</div>
-                  <pre className="p-4 overflow-x-auto text-xs font-mono text-charcoal bg-white/20">
+
+        {/* TASK 04 */}
+        <section id="task-04" className="rounded-2xl p-6 sm:p-10 border border-white/10 bg-white/5 space-y-10 shadow-2xl scroll-mt-36">
+          <div className="space-y-3 border-b border-white/10 pb-6">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-md bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-mono font-bold tracking-wider uppercase">Task 04</span>
+              <span className="text-xs text-slate-400 font-medium">Real-Time Cloud Telemetry</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">Firebase IoT Monitoring Dashboard</h2>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">6. Implementation Source Code</h3>
+            <div className="rounded-xl border border-white/10 overflow-hidden bg-[#0A0B0E] shadow-xl">
+              <div className="flex items-center justify-between gap-4 px-4 py-3 bg-white/5 border-b border-white/10">
+                <span className="text-xs font-mono font-bold text-white">esp32_firebase_telemetry.ino</span>
+              </div>
+              <pre className="p-4 overflow-x-auto text-xs sm:text-sm font-mono text-slate-300 leading-relaxed">
 {`#include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include <DHT.h>
@@ -421,49 +366,51 @@ void loop() {
   }
   delay(5000);
 }`}
-                  </pre>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div className="glass p-2 rounded-3xl border border-white/40">
-                    <img src="/media/media__1790510951506.png" alt="Firebase RTDB" className="w-full rounded-2xl h-full object-cover" />
-                  </div>
-                  <div className="glass p-2 rounded-3xl border border-white/40">
-                    <img src="/media/f1.jpeg" alt="Hardware Prototype" className="w-full rounded-2xl h-full object-cover" />
-                  </div>
-                </div>
-                <div className="glass p-2 rounded-3xl border border-white/40">
-                  <video src="/media/ada_vid.mp4" autoPlay loop muted playsInline className="w-full rounded-2xl aspect-video"></video>
+              </pre>
+            </div>
+          </div>
+
+          <div className="space-y-6 border-t border-white/10 pt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">8. Evidence</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <img src="/media/media__1790510951506.png" alt="Firebase RTDB" className="w-full h-full object-cover" />
                 </div>
               </div>
-
-              <div className="bg-charcoal text-offwhite p-8 rounded-3xl">
-                <h3 className="font-display text-xl mb-4 text-white">9. Reflection</h3>
-                <p className="font-serif italic text-white/80 leading-relaxed">
-                  "Implementing Firebase Realtime Database provided an understanding of cloud-native data synchronization for embedded hardware. Operating a NoSQL real-time database allowed bidirectional communication, where sensor readings streamed to the web interface instantly while UI toggle state changes updated hardware outputs in real time."
-                </p>
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <img src="/media/f1.jpeg" alt="Prototype Hardware" className="w-full h-full object-cover" />
+                </div>
+              </div>
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all md:col-span-2">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <video src="/media/ada_vid.mp4" controls className="w-full h-full object-cover" />
+                </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* TASK 05 */}
-          <section id="task5" className="mb-32">
-            <div className="mb-8">
-              <span className="font-mono text-sm text-graymid block mb-2">Task 05</span>
-              <h2 className="text-3xl font-display text-charcoal mb-2">Complete System Integration & CSV Analytics</h2>
-              <p className="text-graymid font-serif italic">Firebase Logging, Automation & Data Export</p>
+        {/* TASK 05 */}
+        <section id="task-05" className="rounded-2xl p-6 sm:p-10 border border-white/10 bg-white/5 space-y-10 shadow-2xl scroll-mt-36">
+          <div className="space-y-3 border-b border-white/10 pb-6">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-md bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-mono font-bold tracking-wider uppercase">Task 05</span>
+              <span className="text-xs text-slate-400 font-medium">Complete System Integration & CSV Analytics</span>
             </div>
-            
-            <div className="space-y-12">
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-3">1. Overview</h3>
-                <p className="text-charcoal/80 leading-relaxed">Constructed the complete integrated IoT pipeline featuring dual operating modes (Manual control vs Automatic LDR-based threshold automation), continuous time-series logging to Firebase, historical record storage, and a browser-based CSV data export feature for offline analysis.</p>
-              </div>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">Firebase Logging & Automation</h2>
+          </div>
 
-              <div>
-                <h3 className="font-display text-xl text-charcoal mb-4">6. Implementation Source Code & Integration Demo</h3>
-                <div className="glass rounded-2xl border border-white/40 overflow-hidden mb-8">
-                  <div className="p-3 bg-white/40 border-b border-white/40 font-mono text-xs text-graymid">exportToCSV.ts (TypeScript)</div>
-                  <pre className="p-4 overflow-x-auto text-xs font-mono text-charcoal bg-white/20">
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">6. Implementation Source Code</h3>
+            <div className="rounded-xl border border-white/10 overflow-hidden bg-[#0A0B0E] shadow-xl">
+              <div className="flex items-center justify-between gap-4 px-4 py-3 bg-white/5 border-b border-white/10">
+                <span className="text-xs font-mono font-bold text-white">exportToCSV.ts</span>
+              </div>
+              <pre className="p-4 overflow-x-auto text-xs sm:text-sm font-mono text-slate-300 leading-relaxed">
 {`export function downloadSensorDataCSV(dataArray) {
   const headers = ["Timestamp", "Temperature (C)", "Humidity (%)", "Light Level (ADC)", "Bulb State", "Mode"];
   const rows = dataArray.map(row => [
@@ -480,37 +427,30 @@ void loop() {
   link.click();
   document.body.removeChild(link);
 }`}
-                  </pre>
-                </div>
-                <div className="glass p-2 rounded-3xl border border-white/40 mb-4">
-                  <img src="/media/media__1790510820927.png" alt="System UI Dashboard" className="w-full rounded-2xl" />
-                </div>
-                <div className="glass p-2 rounded-3xl border border-white/40">
-                  <video src="/media/dash_vid.mp4" controls className="w-full rounded-2xl aspect-video"></video>
+              </pre>
+            </div>
+          </div>
+
+          <div className="space-y-6 border-t border-white/10 pt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">8. Evidence</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <img src="/media/media__1790510820927.png" alt="Custom System UI" className="w-full h-full object-cover" />
                 </div>
               </div>
-
-              <div className="bg-charcoal text-offwhite p-8 rounded-3xl">
-                <h3 className="font-display text-xl mb-4 text-white">9. Reflection</h3>
-                <p className="font-serif italic text-white/80 leading-relaxed">
-                  "Building the integrated logging and export system synthesized microcontroller firmware, cloud database architecture, and frontend data visualization. Designing both manual and automatic control modes highlighted the importance of fail-safes and user overrides in automated hardware systems."
-                </p>
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0A0B0E] p-2 shadow-lg hover:border-sky-500/40 transition-all md:col-span-2">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-white/5">
+                  <video src="/media/dash_vid.mp4" controls className="w-full h-full object-cover" />
+                </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Comprehensive Synthesis */}
-          <section className="mb-24 text-center">
-            <h2 className="text-2xl font-display text-charcoal mb-6">Overall Technical Reflection</h2>
-            <p className="text-charcoal/80 leading-relaxed bg-white/40 p-8 rounded-3xl border border-white/60 shadow-sm max-w-3xl mx-auto">
-              The IoT & Embedded Systems module provided a hands-on progression from fundamental microcontroller GPIO manipulation to cloud-connected telemetry systems. Starting with local ESP32 HTTP web servers established the mechanics of client-server request cycles on embedded hardware. Moving to MQTT and Adafruit IO demonstrated lightweight publish-subscribe protocols for efficient cloud communication, while IFTTT integration highlighted event-driven workflows. Finally, constructing a full-stack Firebase dashboard with real-time sensor monitoring, threshold automation, and CSV logging demonstrated how hardware, cloud backends, and user interfaces unite into practical IoT solutions.
-            </p>
-          </section>
-
-        </div>
       </div>
-      
-      <Footer />
     </div>
   );
 }
