@@ -31,5 +31,15 @@
       "Day 5: We had a session on \"Applied design thinking\" where we got to explore forge innovation handbook and now I am updating my portfolio website."
     ],
     "embed": "https://scratch.mit.edu/projects/1367739055/embed"
+  },
+  {
+    "week": 7,
+    "title": "IoT & Embedded Systems",
+    "subtitle": "From Prototype to Production",
+    "status": "completed",
+    "details": [
+      "Explored IoT and embedded systems through a series of ESP32-based tasks covering HTTP control, MQTT and Adafruit IO, IFTTT automation, Firebase dashboards, sensor integration, relay control, data logging, and export."
+    ],
+    "externalLink": "/iot"
   }
 ]

@@ -8,14 +8,16 @@ import Footer from "@/components/Footer";
 type WeekData = {
   week: number;
   title: string;
+  subtitle?: string;
   status: string;
   details: string[];
   embed?: string;
+  externalLink?: string;
   caseStudyLink?: string;
 };
 
 export default function ProtosemPage() {
-  const currentWeek = 2; // Increased to 2 since we have week 2 completed
+  const currentWeek = 7;
   const totalWeeks = 20;
 
   const [selectedWeek, setSelectedWeek] = useState<WeekData | null>(null);
@@ -50,49 +52,68 @@ export default function ProtosemPage() {
             />
           </div>
           <div className="mt-3 text-xs text-graymid font-mono italic">
-            Early days. The story is just beginning.
+            The story is unfolding — more weeks ahead.
           </div>
         </div>
 
         {/* Weeks Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-[slideUp_1s_ease-out_0.6s_forwards] opacity-0">
-          {protosemData.map((week) => (
-            <button
-              key={week.week}
-              onClick={() => setSelectedWeek(week as WeekData)}
-              className="group glass rounded-2xl p-6 text-left hover:bg-white/60 transition-all border border-graylight/30 hover:border-graymid/40 hover:-translate-y-1 hover:shadow-lg flex flex-col"
-            >
-              <span className="font-mono text-[10px] text-graymid uppercase tracking-widest mb-3">
-                Week {week.week}
-              </span>
-              <span className="font-display text-lg text-charcoal leading-tight">
-                {week.title}
-              </span>
-              <span className="text-graymid text-xs font-mono mt-auto pt-6 group-hover:text-charcoal transition-colors">
-                View log &rarr;
-              </span>
-            </button>
-          ))}
-          
-          {/* IoT Projects Card */}
-          <Link
-            href="/protosem/iot-smart-home"
-            className="group glass rounded-2xl p-6 text-left hover:bg-white/60 transition-all border border-graylight/30 hover:border-graymid/40 hover:-translate-y-1 hover:shadow-lg flex flex-col"
-          >
-            <span className="font-mono text-[10px] text-graymid uppercase tracking-widest mb-3">
-              Special Project
-            </span>
-            <span className="font-display text-lg text-charcoal leading-tight">
-              IoT-Projects
-            </span>
-            <span className="text-graymid text-xs font-mono mt-auto pt-6 group-hover:text-charcoal transition-colors">
-              View case study &rarr;
-            </span>
-          </Link>
+          {(protosemData as WeekData[]).map((week) => {
+            // Week 7 opens in new tab
+            if (week.externalLink) {
+              return (
+                <a
+                  key={week.week}
+                  href={week.externalLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group glass rounded-2xl p-6 text-left hover:bg-white/60 transition-all border border-graylight/30 hover:border-graymid/40 hover:-translate-y-1 hover:shadow-lg flex flex-col relative overflow-hidden"
+                >
+                  <span className="font-mono text-[10px] text-graymid uppercase tracking-widest mb-1">
+                    Week {week.week}
+                  </span>
+                  {week.subtitle && (
+                    <span className="font-mono text-[9px] text-graymid/60 uppercase tracking-widest mb-2 italic">
+                      {week.subtitle}
+                    </span>
+                  )}
+                  <span className="font-display text-lg text-charcoal leading-tight">
+                    {week.title}
+                  </span>
+                  <span className="text-graymid text-xs font-mono mt-auto pt-4 group-hover:text-charcoal transition-colors flex items-center gap-1">
+                    View document <span className="text-[10px]">↗</span>
+                  </span>
+                </a>
+              );
+            }
+
+            return (
+              <button
+                key={week.week}
+                onClick={() => setSelectedWeek(week)}
+                className="group glass rounded-2xl p-6 text-left hover:bg-white/60 transition-all border border-graylight/30 hover:border-graymid/40 hover:-translate-y-1 hover:shadow-lg flex flex-col"
+              >
+                <span className="font-mono text-[10px] text-graymid uppercase tracking-widest mb-3">
+                  Week {week.week}
+                </span>
+                <span className="font-display text-lg text-charcoal leading-tight">
+                  {week.title}
+                </span>
+                <span className="text-graymid text-xs font-mono mt-auto pt-6 group-hover:text-charcoal transition-colors">
+                  View log &rarr;
+                </span>
+              </button>
+            );
+          })}
           
           {/* Empty placeholders for upcoming weeks to show scale */}
-          {Array.from({ length: totalWeeks - protosemData.length }).map((_, idx) => {
-            const w = protosemData.length + idx;
+          {Array.from({ length: totalWeeks - (protosemData as WeekData[]).length }).map((_, idx) => {
+            // Weeks 3-6 and 8-20 are upcoming (skip 7 which is IoT)
+            const usedWeeks = (protosemData as WeekData[]).map(w => w.week);
+            const allWeeks = Array.from({ length: totalWeeks + 1 }, (_, i) => i);
+            const lockedWeeks = allWeeks.filter(w => !usedWeeks.includes(w) && w > 0);
+            const w = lockedWeeks[idx];
+            if (w === undefined) return null;
             return (
               <div
                 key={`empty-${w}`}
