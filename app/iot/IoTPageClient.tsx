@@ -366,6 +366,63 @@ function RepoLinkCard() {
 }
 
 /* ─────────────────────────────────────────────
+   Step-by-Step Recreation Manual Card
+───────────────────────────────────────────── */
+function RecreationManualCard({
+  taskNumber,
+  repoFolder,
+  title = "Hardware & Firmware Step-by-Step Recreation Manual",
+  steps,
+}: {
+  taskNumber: string;
+  repoFolder: string;
+  title?: string;
+  steps: { step: string; detail: string; command?: string }[];
+}) {
+  return (
+    <div className="rounded-2xl border-2 border-indigo-200/80 bg-gradient-to-br from-indigo-50/60 via-white to-sky-50/40 p-6 my-5 shadow-sm space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-200/60 pb-3">
+        <div className="flex items-center gap-2.5">
+          <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-mono text-xs font-bold flex items-center justify-center shadow-sm">
+            {taskNumber}
+          </span>
+          <h4 className="font-display font-semibold text-charcoal text-base">
+            {title}
+          </h4>
+        </div>
+        <a
+          href={`https://github.com/SAISANJAYR/IOT/tree/main/${repoFolder}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-mono text-[11px] font-bold shadow-sm transition-all"
+        >
+          <span>View Task Manual on GitHub</span>
+          <span>↗</span>
+        </a>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {steps.map((s, idx) => (
+          <div key={idx} className="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-mono text-[10px] font-bold flex items-center justify-center">
+                {idx + 1}
+              </span>
+              <span className="font-mono text-xs font-bold text-charcoal">{s.step}</span>
+            </div>
+            <p className="text-[11px] font-body text-charcoal/75 leading-relaxed">{s.detail}</p>
+            {s.command && (
+              <pre className="font-mono text-[10px] bg-zinc-900 text-emerald-400 p-2 rounded-lg overflow-x-auto">
+                {s.command}
+              </pre>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
    Media image
 ───────────────────────────────────────────── */
 function MediaImage({
@@ -1254,7 +1311,7 @@ export default function IoTPageClient() {
                 <div className="p-4 rounded-xl border border-charcoal/15 bg-white shadow-sm">
                   <div className="text-[10px] font-mono text-charcoal/70 uppercase tracking-widest mb-1.5 font-bold">Request Pipeline</div>
                   <p className="text-xs text-charcoal/75 leading-relaxed font-body">
-                    When the user visits <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">http://192.168.56.202/on</code> in their browser, the ESP32 handles the request on port 80, executes <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">digitalWrite(2, HIGH)</code>, illuminates the onboard blue LED, and serves the confirmation page saying &ldquo;LED is ON&rdquo;.
+                    When the user visits <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">http://192.168.1.50/</code> in their browser, the ESP32 handles the request on port 80, executes <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">digitalWrite(2, HIGH)</code> or <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">LOW</code>, illuminates the onboard blue LED, and serves the dark mode control panel.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-charcoal/15 bg-white shadow-sm">
@@ -1374,17 +1431,44 @@ void loop() {
           </div>
 
           <div>
+            <Sub>Step-by-Step Recreation Manual</Sub>
+            <RecreationManualCard
+              taskNumber="01"
+              repoFolder="Task-01-ESP32-WebServer-LED"
+              title="ESP32 Web Server & LED Control Manual"
+              steps={[
+                {
+                  step: "Circuit Connections",
+                  detail: "Connect onboard blue LED or an external 5mm LED: Anode to ESP32 GPIO 2 via a 220Ω resistor, Cathode to GND.",
+                },
+                {
+                  step: "Wi-Fi Configuration",
+                  detail: "Open Task_01_ESP32_WebServer_LED.ino and configure your 2.4 GHz Wi-Fi SSID and password.",
+                },
+                {
+                  step: "Flash Microcontroller",
+                  detail: "Select 'ESP32 Dev Module' and COM port at 115200 baud in Arduino IDE. Hold BOOT button during upload if required.",
+                },
+                {
+                  step: "Browser Control",
+                  detail: "Open Serial Monitor to observe assigned IP (http://192.168.1.50/), then open in any browser on the subnet to toggle the LED.",
+                },
+              ]}
+            />
+          </div>
+
+          <div>
             <Sub>Lab Verification &amp; Evidence</Sub>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MediaImage
-                src="/media/esp32_led_on_hardware.png"
-                alt="Physical ESP32 web server verification with browser LED is ON endpoint"
-                caption="Hardware & browser verification: ESP32 serving web interface at http://192.168.56.202/on with onboard GPIO 2 blue LED illuminated"
+                src="/media/task1_web_ui.jpg"
+                alt="ESP32 Local Web Control interface hosted at http://192.168.1.50/"
+                caption="Browser Control Interface: Embedded dark web dashboard hosted directly on the ESP32 at http://192.168.1.50/ showing connection status, device model, and TURN ON / TURN OFF buttons"
               />
               <MediaImage
-                src="/media/f1.jpeg"
-                alt="ESP32 breadboard hardware setup on lab bench"
-                caption="Physical bench setup: ESP32 DevKit connected over micro-USB, listening for HTTP requests"
+                src="/media/task1_esp32_hardware.png"
+                alt="ESP32 DevKit hardware connected via USB with blue LED illuminated"
+                caption="Physical Hardware Setup: ESP32 DevKit connected via micro-USB with onboard blue GPIO 2 indicator LED successfully illuminated following web command"
               />
             </div>
           </div>
@@ -1454,6 +1538,13 @@ void loop() {
                 { pin: "Relay NO", component: "Incandescent Lamp Live", type: "230V AC Switched Line", notes: "Normally Open terminal; circuit completes only when relay is energized." },
               ]}
             />
+            <div className="mt-4">
+              <MediaImage
+                src="/media/task2_relay_circuit.jpg"
+                alt="ESP32 DevKit V1 and 5V Optocoupled Relay AC Lamp Circuit Wiring Diagram"
+                caption="Circuit Schematic & Wiring Representation: ESP32 GPIO 4 triggering 5V optocoupled relay module switching 230V AC mains incandescent lamp with complete optical isolation."
+              />
+            </div>
           </div>
 
           <div>
@@ -1553,6 +1644,33 @@ void loop() {
                   issue: "Active-LOW vs Active-HIGH Logic Inversion",
                   cause: "The relay board was configured for active-LOW optocoupler trigger, meaning 0V energized the coil and 3.3V released it.",
                   solution: "Inverted the output state in firmware so incoming 'ON' pulled the pin to GND and 'OFF' set it HIGH.",
+                },
+              ]}
+            />
+          </div>
+
+          <div>
+            <Sub>Step-by-Step Recreation Manual</Sub>
+            <RecreationManualCard
+              taskNumber="02"
+              repoFolder="Task-02-AdafruitIO-MQTT-Relay"
+              title="Adafruit IO Dashboard & MQTT Relay Manual"
+              steps={[
+                {
+                  step: "AC Mains Load Wiring (Safety First)",
+                  detail: "DISCONNECT MAINS PLUG. Cut Phase wire and screw into Relay COM and NO terminals. Keep Neutral intact directly to the lamp.",
+                },
+                {
+                  step: "DC Logic Interface",
+                  detail: "Connect ESP32 VIN (5V) to Relay VCC, GND to GND, and GPIO 4 to Relay IN1 signal pin via DuPont wires.",
+                },
+                {
+                  step: "Adafruit IO Cloud Setup",
+                  detail: "Create feed 'relay-control' on io.adafruit.com, add a Toggle block on your dashboard, and copy your AIO username & key.",
+                },
+                {
+                  step: "Flash & Verify",
+                  detail: "Enter credentials in config.h, compile Task_02_Adafruit_MQTT_Relay.ino, and toggle from any browser globally.",
                 },
               ]}
             />
@@ -1738,6 +1856,33 @@ void loop() {
           </div>
 
           <div>
+            <Sub>Step-by-Step Recreation Manual</Sub>
+            <RecreationManualCard
+              taskNumber="03"
+              repoFolder="Task-03-IFTTT-Voice-Automation"
+              title="IFTTT Voice Automation Manual"
+              steps={[
+                {
+                  step: "Configure IFTTT Applet",
+                  detail: "Create an applet on ifttt.com: Trigger = Google Assistant ('Activate an appliance' or 'Say a phrase').",
+                },
+                {
+                  step: "Connect Adafruit IO Action",
+                  detail: "Action = Adafruit service 'Send data to Adafruit IO', choose feed 'relay-control', and set payload to 'ON'.",
+                },
+                {
+                  step: "Complementary OFF Applet",
+                  detail: "Create second applet triggering on 'Turn off the lamp' to push payload 'OFF' to the same feed.",
+                },
+                {
+                  step: "Voice Testing & Verification",
+                  detail: "Speak phrase to Google Assistant on your phone. Command executes across cloud hops to trigger ESP32 in ~898ms.",
+                },
+              ]}
+            />
+          </div>
+
+          <div>
             <Sub>Lab Verification &amp; Evidence</Sub>
             <div className="grid grid-cols-1 gap-4">
               <MediaVideo
@@ -1814,6 +1959,13 @@ void loop() {
                 { pin: "GND Rail", component: "Common Ground Bus", type: "0V Reference", notes: "Ties ESP32, sensors, and relay logic ground together." },
               ]}
             />
+            <div className="mt-4">
+              <MediaImage
+                src="/media/task4_sensor_circuit.jpg"
+                alt="ESP32 DevKit V1 with DHT11, LDR Voltage Divider, and Relay Circuit Schematic"
+                caption="Circuit Schematic & Breadboard Layout: ESP32 DevKit wired to DHT11 digital temp/humidity sensor on GPIO 14, LDR 10k divider on analog ADC pin GPIO 34, and 5V relay module on GPIO 4."
+              />
+            </div>
           </div>
 
           <div>
@@ -1945,6 +2097,33 @@ void loop() {
           </div>
 
           <div>
+            <Sub>Step-by-Step Recreation Manual</Sub>
+            <RecreationManualCard
+              taskNumber="04"
+              repoFolder="Task-04-Firebase-Sensors-Telemetry"
+              title="Firebase Sensors Telemetry & Automation Manual"
+              steps={[
+                {
+                  step: "Sensor Bus Prototyping",
+                  detail: "Wire DHT11 to GPIO 14 (3.3V power). Wire 5mm LDR with 10kΩ pull-down resistor as voltage divider to ADC pin GPIO 34.",
+                },
+                {
+                  step: "Google Firebase Console Setup",
+                  detail: "Create Firebase Realtime Database project. Set rules (.read: true, .write: true). Copy Web API Key and Database URL.",
+                },
+                {
+                  step: "Library Installation & Flashing",
+                  detail: "Install 'Firebase ESP32 Client' by Mobizt and 'DHT sensor library' in Arduino IDE. Flash Task_04_Firebase_Sensors_Telemetry.ino.",
+                },
+                {
+                  step: "Dual-Mode Testing",
+                  detail: "Test AUTO-SENSE mode (relay fires automatically when ambient light < threshold) and MANUAL mode (toggled via web dashboard).",
+                },
+              ]}
+            />
+          </div>
+
+          <div>
             <Sub>Lab Verification &amp; Evidence</Sub>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MediaImage
@@ -1969,9 +2148,9 @@ void loop() {
                 caption="Live RTDB data snapshot during active testing session (threshold: 1425, mode: MANUAL)"
               />
               <MediaImage
-                src="/media/f1.jpeg"
-                alt="Full hardware prototype: ESP32 breadboard and laptop telemetry dashboard"
-                caption="Complete hardware setup: breadboard sensors connected, telemetry rendering on screen"
+                src="/media/task4_sensor_circuit.jpg"
+                alt="ESP32 Breadboard & Circuit Schematic for DHT11, LDR Divider, and Relay"
+                caption="Circuit Schematics & Hardware Interface: Complete wiring manual layout connecting ESP32 to DHT11, 10k LDR voltage divider, and 5V relay module"
               />
             </div>
           </div>
@@ -2078,6 +2257,34 @@ export function downloadSensorDataCSV(records: SensorLogEntry[]) {
           <div>
             <Sub>Downloaded File Verification &amp; Sample CSV Telemetry</Sub>
             <CsvPreviewTable />
+          </div>
+
+          <div>
+            <Sub>Step-by-Step Recreation Manual</Sub>
+            <RecreationManualCard
+              taskNumber="05"
+              repoFolder="Task-05-Firebase-Logging-CSV-Analytics"
+              title="Time-Series Logging & CSV Analytics Manual"
+              steps={[
+                {
+                  step: "NTP Time Synchronization",
+                  detail: "ESP32 contacts atomic time servers (pool.ntp.org) over UDP port 123 to synchronize internal hardware clock with real-world UTC time.",
+                },
+                {
+                  step: "Periodic Database Telemetry Push",
+                  detail: "Flash Task_05_Firebase_Logging_CSV.ino. Telemetry records are committed every 5 seconds under /telemetry/logs/{timestamp}.",
+                },
+                {
+                  step: "Automated CSV Extraction Script",
+                  detail: "Execute python export_firebase_csv.py to fetch records from Firebase REST API and write structured RFC-4180 CSV.",
+                  command: "python export_firebase_csv.py <DATABASE_URL>/telemetry/logs.json output.csv",
+                },
+                {
+                  step: "Statistical Analytics Generation",
+                  detail: "The script computes mean, standard deviation, and min/max ranges for temperature, humidity, and ambient illuminance.",
+                },
+              ]}
+            />
           </div>
 
           <div>
