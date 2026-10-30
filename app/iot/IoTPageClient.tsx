@@ -751,6 +751,285 @@ function ESP32VirtualLab() {
 }
 
 /* ─────────────────────────────────────────────
+   Interactive Firebase System UI Dashboard
+   (smarthome-iot-e9fe6.web.app/dashboard.html)
+───────────────────────────────────────────── */
+function FirebaseTelemetryDashboard() {
+  const [systemMode, setSystemMode] = useState<"AUTO-SENSE" | "MANUAL">("AUTO-SENSE");
+  const [ambientLight, setAmbientLight] = useState(1980);
+  const [ldrThreshold, setLdrThreshold] = useState(1800);
+  const [manualRelay, setManualRelay] = useState(false);
+  const [temp, setTemp] = useState(24.5);
+  const [hum, setHum] = useState(45.0);
+  const [isConnected, setIsConnected] = useState(true);
+  const [logs, setLogs] = useState<string[]>([
+    "[17:36:10] WebSocket connection established (wss://smarthome-iot-e9fe6.firebaseio.com)",
+    "[17:36:11] RTDB Auth: Verified token permissions on /current",
+    "[17:36:12] Mode: AUTO-SENSE active. Autonomous LDR evaluation armed.",
+    "[17:36:13] Telemetry sync: Temp 24.5°C | Hum 45% | LDR 1980 | Threshold 1800",
+    "[17:36:14] Autonomy check: LDR (1980) >= Threshold (1800) -> Daylight detected -> Relay OFF",
+  ]);
+
+  // Autonomous logic: If AUTO-SENSE, relay is ON when ambientLight < ldrThreshold (darkness).
+  // If MANUAL, relay follows manualRelay state.
+  const isRelayOn = systemMode === "AUTO-SENSE" ? ambientLight < ldrThreshold : manualRelay;
+
+  const addLog = (msg: string) => {
+    const time = new Date().toLocaleTimeString();
+    setLogs((prev) => [`[${time}] ${msg}`, ...prev.slice(0, 6)]);
+  };
+
+  const handleModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMode = e.target.value as "AUTO-SENSE" | "MANUAL";
+    setSystemMode(newMode);
+    if (newMode === "AUTO-SENSE") {
+      addLog("MODE SWITCH: Activated AUTO-SENSE. Manual toggle switch disabled. Auto-light sensing active.");
+    } else {
+      addLog("MODE SWITCH: Activated MANUAL override. Toggle switch unlocked.");
+    }
+  };
+
+  const handleManualToggle = () => {
+    if (systemMode !== "MANUAL") return;
+    const nextState = !manualRelay;
+    setManualRelay(nextState);
+    addLog(`MANUAL ACTUATION: /current/bulbState updated to ${nextState ? "TRUE (ON)" : "FALSE (OFF)"}`);
+  };
+
+  const handleLdrSlider = (val: number) => {
+    setAmbientLight(val);
+    if (systemMode === "AUTO-SENSE") {
+      if (val < ldrThreshold && !isRelayOn) {
+        addLog(`AUTO-TRIGGER: LDR (${val}) < Threshold (${ldrThreshold}) -> Darkness detected! Relay ENERGIZED (Bulb ON).`);
+      } else if (val >= ldrThreshold && isRelayOn) {
+        addLog(`AUTO-TRIGGER: LDR (${val}) >= Threshold (${ldrThreshold}) -> Sufficient ambient light. Relay RELEASED (Bulb OFF).`);
+      }
+    }
+  };
+
+  const handleThresholdSlider = (val: number) => {
+    setLdrThreshold(val);
+    addLog(`THRESHOLD CALIBRATION: User adjusted LDR setpoint to ${val} ADC counts.`);
+  };
+
+  return (
+    <div className="rounded-3xl border-2 border-emerald-500/30 bg-[#07080a] text-white p-6 sm:p-8 shadow-2xl relative overflow-hidden my-6">
+      {/* Background ambient glow */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-500/10 blur-3xl rounded-full pointer-events-none" />
+
+      {/* Top Bar matching smarthome-iot-e9fe6.web.app */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-white/10">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-emerald-400 font-bold">&gt; SYSTEM UI</span>
+          <span className="text-[10px] font-mono text-zinc-500 bg-white/5 px-2 py-0.5 rounded border border-white/10">
+            smarthome-iot-e9fe6.web.app
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-emerald-400 animate-ping" : "bg-red-500"}`} />
+            <span className={isConnected ? "text-emerald-400 font-bold" : "text-zinc-500"}>
+              {isConnected ? "CONNECTED (WebSockets)" : "DISCONNECTED"}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setIsConnected(!isConnected);
+              addLog(isConnected ? "Client disconnected from Firebase." : "Re-established live WebSocket sync.");
+            }}
+            className="text-[10px] font-mono uppercase px-3 py-1 rounded border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 transition-colors"
+          >
+            {isConnected ? "DISCONNECT" : "RECONNECT"}
+          </button>
+        </div>
+      </div>
+
+      {/* Title */}
+      <div className="relative z-10 text-center my-6">
+        <h4 className="text-2xl sm:text-3xl font-display text-white tracking-wide">
+          Telemetry Feed
+        </h4>
+        <p className="text-xs font-mono text-zinc-400 mt-1">
+          Connection active. Receiving sensor packet structure.
+        </p>
+      </div>
+
+      {/* 6 Grid Cards */}
+      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Card 1: TEMPERATURE */}
+        <div className="p-5 rounded-2xl bg-[#0f1117] border border-white/10 flex flex-col justify-between">
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest text-center">
+            TEMPERATURE
+          </div>
+          <div className="text-3xl sm:text-4xl font-mono font-bold text-emerald-400 text-center my-4">
+            {temp.toFixed(1)} °C
+          </div>
+          <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
+            <span>Sensor: DHT11</span>
+            <span className="text-emerald-400/80">Nominal</span>
+          </div>
+        </div>
+
+        {/* Card 2: HUMIDITY */}
+        <div className="p-5 rounded-2xl bg-[#0f1117] border border-white/10 flex flex-col justify-between">
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest text-center">
+            HUMIDITY
+          </div>
+          <div className="text-3xl sm:text-4xl font-mono font-bold text-emerald-400 text-center my-4">
+            {hum.toFixed(0)} %
+          </div>
+          <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
+            <span>Relative RH</span>
+            <span className="text-emerald-400/80">Indoor comfort</span>
+          </div>
+        </div>
+
+        {/* Card 3: AMBIENT LIGHT */}
+        <div className="p-5 rounded-2xl bg-[#0f1117] border border-white/10 flex flex-col justify-between">
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest text-center">
+            AMBIENT LIGHT
+          </div>
+          <div className="text-3xl sm:text-4xl font-mono font-bold text-emerald-400 text-center my-2">
+            {ambientLight}
+          </div>
+          <div className="space-y-1">
+            <div className="flex justify-between text-[9px] font-mono text-zinc-400">
+              <span>Dark (&lt;800)</span>
+              <span>ADC Level</span>
+              <span>Bright (&gt;3000)</span>
+            </div>
+            <input
+              type="range"
+              min="200"
+              max="4000"
+              value={ambientLight}
+              onChange={(e) => handleLdrSlider(Number(e.target.value))}
+              className="w-full accent-emerald-400 cursor-pointer"
+            />
+          </div>
+        </div>
+
+        {/* Card 4: SYSTEM MODE */}
+        <div className="p-5 rounded-2xl bg-[#0f1117] border border-white/10 flex flex-col justify-between">
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest text-center">
+            SYSTEM MODE
+          </div>
+          <div className="my-3">
+            <select
+              value={systemMode}
+              onChange={handleModeChange}
+              className="w-full py-2.5 px-3 rounded-xl bg-black/60 border border-emerald-500/40 text-emerald-300 font-mono text-xs font-bold focus:outline-none focus:ring-1 focus:ring-emerald-400"
+            >
+              <option value="AUTO-SENSE">AUTO-SENSE (Autonomous)</option>
+              <option value="MANUAL">MANUAL (Human Override)</option>
+            </select>
+          </div>
+          <div className="text-[10px] font-mono text-zinc-400 text-center">
+            {systemMode === "AUTO-SENSE" ? "Autonomous light control enabled" : "Direct manual override mode"}
+          </div>
+        </div>
+
+        {/* Card 5: MAIN RELAY (AUTO vs MANUAL) */}
+        <div className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${isRelayOn ? "bg-emerald-950/20 border-emerald-500/50" : "bg-[#0f1117] border-white/10"}`}>
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest text-center">
+            MAIN RELAY (LIGHT CONTROL)
+          </div>
+
+          {/* In AUTO-SENSE mode: NO manual toggle switch is shown! */}
+          {systemMode === "AUTO-SENSE" ? (
+            <div className="my-3 text-center space-y-2">
+              <div className="flex items-center justify-center gap-2">
+                <span className={`w-3.5 h-3.5 rounded-full ${isRelayOn ? "bg-emerald-400 shadow-[0_0_15px_#10b981]" : "bg-zinc-700"}`} />
+                <span className={`font-mono text-lg font-bold ${isRelayOn ? "text-emerald-400" : "text-zinc-400"}`}>
+                  {isRelayOn ? "AUTO: ON 💡" : "AUTO: OFF 🔌"}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-mono text-zinc-300 leading-relaxed">
+                <span className="text-emerald-400 font-bold block mb-0.5">⚡ Autonomous Light ON/OFF</span>
+                Light triggers automatically via LDR ({ambientLight}) vs Threshold ({ldrThreshold}).
+                <span className="text-zinc-400 block mt-1 italic">
+                  (Manual toggle is disabled in Auto Mode to prevent conflicting overrides.)
+                </span>
+              </div>
+            </div>
+          ) : (
+            /* In MANUAL mode: The toggle switch is available! */
+            <div className="my-3 text-center space-y-2">
+              <div className="flex items-center justify-center gap-3">
+                <span className={`font-mono text-xs font-bold ${isRelayOn ? "text-emerald-400" : "text-zinc-500"}`}>
+                  {isRelayOn ? "BULB: ON 💡" : "BULB: OFF 🔌"}
+                </span>
+              </div>
+              <button
+                onClick={handleManualToggle}
+                className={`w-full py-2.5 rounded-xl font-mono text-xs font-bold transition-all shadow-md active:scale-95 ${
+                  isRelayOn
+                    ? "bg-emerald-500 text-black hover:bg-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                    : "bg-white/10 text-white hover:bg-white/20 border border-white/20"
+                }`}
+              >
+                {isRelayOn ? "TOGGLE OFF (Click to Release)" : "TOGGLE ON (Click to Energize)"}
+              </button>
+              <div className="text-[10px] font-mono text-zinc-400">
+                Manual Override Active
+              </div>
+            </div>
+          )}
+
+          <div className="text-[9px] font-mono text-zinc-500 text-center">
+            Relay Output: GPIO 26 · 230V Optocoupled
+          </div>
+        </div>
+
+        {/* Card 6: LDR THRESHOLD */}
+        <div className="p-5 rounded-2xl bg-[#0f1117] border border-white/10 flex flex-col justify-between">
+          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest text-center">
+            LDR THRESHOLD: <span className="text-cyan-400 font-bold">{ldrThreshold}</span>
+          </div>
+          <div className="my-3 space-y-2">
+            <input
+              type="range"
+              min="500"
+              max="3500"
+              value={ldrThreshold}
+              onChange={(e) => handleThresholdSlider(Number(e.target.value))}
+              className="w-full accent-cyan-400 cursor-pointer"
+            />
+            <div className="flex justify-between text-[9px] font-mono text-zinc-500">
+              <span>Dark: 500</span>
+              <span>Current: {ldrThreshold}</span>
+              <span>Bright: 3500</span>
+            </div>
+          </div>
+          <div className="text-[10px] font-mono text-zinc-400 text-center">
+            If LDR &lt; {ldrThreshold} → Relay ON in Auto Mode
+          </div>
+        </div>
+      </div>
+
+      {/* Data Stream Monitor */}
+      <div className="relative z-10 mt-6 pt-5 border-t border-white/10">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-mono text-zinc-300 font-bold uppercase tracking-wider flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            Data Stream Monitor (Live WebSocket Feed)
+          </span>
+          <span className="text-[10px] font-mono text-zinc-500">Node: /current</span>
+        </div>
+        <div className="bg-black/80 rounded-xl p-3 border border-white/10 font-mono text-[10px] h-28 overflow-y-auto leading-relaxed text-zinc-300 space-y-1">
+          {logs.map((log, i) => (
+            <div key={i} className={i === 0 ? "text-emerald-400 font-semibold" : "text-zinc-400"}>
+              {log}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────────── */
 export default function IoTPageClient() {
@@ -975,8 +1254,7 @@ export default function IoTPageClient() {
                 <div className="p-4 rounded-xl border border-charcoal/15 bg-white shadow-sm">
                   <div className="text-[10px] font-mono text-charcoal/70 uppercase tracking-widest mb-1.5 font-bold">Request Pipeline</div>
                   <p className="text-xs text-charcoal/75 leading-relaxed font-body">
-                    When the user taps &ldquo;TURN ON&rdquo; in the browser, an HTTP request hits <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">http://192.168.1.50/led/on</code>.
-                    The ESP32 executes <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">digitalWrite(2, HIGH)</code>, returns an HTTP 303 redirect to root, and refreshes the page state.
+                    When the user visits <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">http://192.168.56.202/on</code> in their browser, the ESP32 handles the request on port 80, executes <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">digitalWrite(2, HIGH)</code>, illuminates the onboard blue LED, and serves the confirmation page saying &ldquo;LED is ON&rdquo;.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-charcoal/15 bg-white shadow-sm">
@@ -1099,9 +1377,9 @@ void loop() {
             <Sub>Lab Verification &amp; Evidence</Sub>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MediaImage
-                src="/media/html_led_control.png"
-                alt="ESP32 Local Web Control browser UI — TURN ON / TURN OFF buttons"
-                caption="Browser interface served directly from ESP32 RAM at http://192.168.1.50 on the local network"
+                src="/media/esp32_led_on_hardware.png"
+                alt="Physical ESP32 web server verification with browser LED is ON endpoint"
+                caption="Hardware & browser verification: ESP32 serving web interface at http://192.168.56.202/on with onboard GPIO 2 blue LED illuminated"
               />
               <MediaImage
                 src="/media/f1.jpeg"
@@ -1584,6 +1862,16 @@ void loop() {
           </div>
 
           <div>
+            <Sub>Interactive Live Firebase Telemetry Dashboard (System UI)</Sub>
+            <p className="text-xs text-charcoal/70 mb-3 font-body">
+              An interactive recreation of the production dashboard hosted on Firebase Hosting (<code>smarthome-iot-e9fe6.web.app</code>).
+              Toggle between <b>AUTO-SENSE</b> (where manual toggle is hidden and light is governed autonomously by the LDR sensor vs threshold)
+              and <b>MANUAL</b> (where the direct toggle switch is unlocked).
+            </p>
+            <FirebaseTelemetryDashboard />
+          </div>
+
+          <div>
             <Sub>Firmware Telemetry Loop</Sub>
             <CodeBlock filename="Task_04_Firebase_Sensors_Telemetry.ino" code={`#include <WiFi.h>
 #include <Firebase_ESP_Client.h>
@@ -1659,6 +1947,12 @@ void loop() {
           <div>
             <Sub>Lab Verification &amp; Evidence</Sub>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <MediaImage
+                src="/media/firebase_cli_init.jpg"
+                alt="Firebase CLI Terminal initialization and deployment"
+                caption="Firebase CLI setup: 'firebase login' developer authentication, 'firebase init database' RTDB provisioning with rules, and 'firebase deploy'"
+                wide
+              />
               <MediaImage
                 src="/media/firebase-rtdb-console.png"
                 alt="Firebase Realtime Database console showing live JSON tree"
