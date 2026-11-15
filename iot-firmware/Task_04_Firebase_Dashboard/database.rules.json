@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "current": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "telemetry": {
+      "logs": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".indexOn": ["timestamp"]
+      }
+    }
+  }
+}

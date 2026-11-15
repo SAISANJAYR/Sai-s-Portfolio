@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="logo"><h2>System UI</h2></a>
+    <a href="index.html" class="btn">Disconnect</a>
+  </nav>
+
+  <div class="dashboard-header">
+    <h1>Telemetry Feed</h1>
+    <p>Connection active. Receiving sensor packet structure.</p>
+  </div>
+
+  <section class="dashboard">
+    <div class="sensor">
+      <h3>Temperature</h3>
+      <h1 id="temp">24.5 °C</h1>
+    </div>
+    <div class="sensor">
+      <h3>Humidity</h3>
+      <h1 id="hum">45 %</h1>
+    </div>
+    <div class="sensor">
+      <h3>Ambient Light</h3>
+      <h1 id="ldr">1980</h1>
+    </div>
+  </section>
+
+  <section class="controls-panel">
+    <div class="control-card">
+      <h3>System Mode</h3>
+      <select id="modeSelect" class="cyber-select">
+        <option value="AUTO" selected>AUTO-SENSE</option>
+        <option value="MANUAL">MANUAL OVERRIDE</option>
+      </select>
+    </div>
+
+    <div class="control-card">
+      <h3>Main Relay</h3>
+      <label class="switch cyber-switch">
+        <input type="checkbox" id="bulbToggle" checked>
+        <span class="slider"></span>
+      </label>
+      <div id="bulbStatus" class="status-text">ON</div>
+    </div>
+
+    <div class="control-card">
+      <h3>LDR Threshold: <span id="thValue" class="neon-text">1800</span></h3>
+      <input type="range" id="threshold" class="cyber-slider" min="0" max="4095" value="1800">
+    </div>
+  </section>
+
+  <section class="graph">
+    <h2>Data Stream Monitor</h2>
+    <div class="code-block">
+      [SYS_LOG] Listening to database node: "current"<br>
+      [SYS_LOG] Mapping values...<br>
+      [SYS_LOG] Node fully synced.
+    </div>
+  </section>
+
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,21 +1,51 @@
-# ProtoSem Week 07 — IoT & Embedded Systems Firmware
-**Author:** Sai Sanjay R  
-**Target Hardware:** ESP32-WROOM-32 (38-pin DevKit V1)  
-**IDE:** Arduino IDE 2.x with espressif/arduino-esp32 core  
+# ProtoSem Week 07 — IoT & Embedded Systems: Source Files
+**Author:** Sai Sanjay R
+**Documentation page:** [`/iot`](https://github.com/SAISANJAYR/Sai-s-Portfolio/blob/main/app/iot/IoTPageClient.tsx) on my portfolio
+**Board:** ESP32 DevKit V1 (ESP32-WROOM-32) · **IDE:** Arduino IDE 2.x + `espressif/arduino-esp32`
 
-## Firmware Sketches
+Every code listing shown on the IoT page is generated from the files in this folder, so the
+page and the repository always contain the same code.
 
-| Task | File | Protocol | Primary Peripherals |
-|------|------|----------|---------------------|
-| **Task 01** | [`Task_01_ESP32_WebServer_LED.ino`](./Task_01_ESP32_WebServer_LED.ino) | Local HTTP (Port 80) | Onboard LED (GPIO 2) |
-| **Task 02** | [`Task_02_Adafruit_MQTT_Relay.ino`](./Task_02_Adafruit_MQTT_Relay.ino) | MQTT (io.adafruit.com:1883) | 2-Ch Optocoupler Relay (GPIO 4), 230V Lamp |
-| **Task 03** | [`Task_03_IFTTT_Voice_Automation.ino`](./Task_03_IFTTT_Voice_Automation.ino) | Webhooks + MQTT | Google Assistant, Adafruit IO, Relay (GPIO 4) |
-| **Task 04** | [`Task_04_Firebase_Sensors_Telemetry.ino`](./Task_04_Firebase_Sensors_Telemetry.ino) | WebSocket / HTTPS BaaS | DHT11 (GPIO 4), LDR (GPIO 34 ADC1), Relay (GPIO 26) |
-| **Task 05** | [`Task_05_Firebase_Logging_CSV.ino`](./Task_05_Firebase_Logging_CSV.ino) | BaaS + NTP + CSV | DHT11, LDR, Auto-Hysteresis Relay, Realtime DB Logging |
+## Files per task
 
-## Required Arduino Libraries
-- `WebServer.h` (Native in ESP32 Core)
-- `WiFi.h` (Native in ESP32 Core)
-- `Adafruit MQTT Library` by Adafruit
-- `DHT sensor library` by Adafruit
-- `Firebase ESP Client` by Mobizt (v4.4.x+)
+| Task | Folder | Files |
+|------|--------|-------|
+| **01** ESP32 Web Server & HTML LED Control | [`Task_01_ESP32_WebServer_LED/`](./Task_01_ESP32_WebServer_LED) | `Task_01_ESP32_WebServer_LED.ino` (firmware + embedded HTML/CSS/JS interface) |
+| **02** Adafruit IO Dashboard & MQTT | [`Task_02_Adafruit_MQTT_Relay/`](./Task_02_Adafruit_MQTT_Relay) | `Task_02_Adafruit_MQTT_Relay.ino`, `config.h` |
+| **03** IFTTT + Adafruit IO Automation | [`Task_03_IFTTT_Voice_Automation/`](./Task_03_IFTTT_Voice_Automation) | `Task_03_IFTTT_Voice_Automation.ino` (the IFTTT applet itself is configured on ifttt.com — documented on the page) |
+| **04** Firebase IoT Monitoring Dashboard | [`Task_04_Firebase_Sensors_Telemetry/`](./Task_04_Firebase_Sensors_Telemetry) · [`Task_04_Firebase_Dashboard/`](./Task_04_Firebase_Dashboard) | `Task_04_Firebase_Sensors_Telemetry.ino`; dashboard: `index.html` (login), `dashboard.html`, `css/style.css`, `js/firebase.js`, `js/auth.js`, `js/dashboard.js`, `database.rules.json` |
+| **05** Firebase Logging, Automation & Data Export | [`Task_05_Firebase_Logging_CSV/`](./Task_05_Firebase_Logging_CSV) | `Task_05_Firebase_Logging_CSV.ino`, `dashboard/history.html`, `dashboard/js/history.js`, `export_firebase_csv.py`, `sample_sensor_telemetry.csv` |
+
+## Pin map (all tasks)
+
+| ESP32 pin | Connected to | Tasks |
+|-----------|--------------|-------|
+| GPIO 2 | Onboard blue LED (+ optional external LED via 220 Ω) | 1 (and status LED in 2–5) |
+| GPIO 4 | Relay module IN1 (active-LOW) | 2, 3, 4, 5 |
+| GPIO 14 | DHT11 data (10 kΩ pull-up) | 4, 5 |
+| GPIO 34 | LDR / 10 kΩ divider midpoint (ADC1_CH6) | 4, 5 |
+| VIN (5 V) | Relay VCC | 2–5 |
+| 3V3 | DHT11 VCC, LDR divider top | 4, 5 |
+| GND | Common ground | all |
+
+## Libraries
+- `WiFi.h`, `WebServer.h`, `time.h` — part of the ESP32 core
+- **Adafruit MQTT Library** (Adafruit) — Tasks 2, 3
+- **Firebase Arduino Client Library for ESP8266 and ESP32** (`Firebase_ESP_Client.h`, Mobizt) — Tasks 4, 5
+- **DHT sensor library** (Adafruit) + **Adafruit Unified Sensor** — Tasks 4, 5
+
+## Firebase dashboard (Tasks 4–5)
+The dashboard is plain HTML + ES modules using the Firebase JS SDK v10 from the gstatic CDN.
+Put your own web config in `js/firebase.js`, then deploy with the Firebase CLI:
+
+```bash
+firebase login
+firebase init hosting database   # public dir = this folder
+firebase deploy
+```
+
+For Task 5, copy `Task_05_Firebase_Logging_CSV/dashboard/` next to the Task 4 files
+(it reuses `css/style.css` and `js/firebase.js`).
+
+Credentials in every file are placeholders (`YOUR_...`). Never commit real Wi-Fi passwords,
+AIO keys or device-account passwords.

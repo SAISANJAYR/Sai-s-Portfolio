@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import Footer from "@/components/Footer";
+import { IOT_SOURCES } from "./iotSources";
+
+const PORTFOLIO_FW = "https://github.com/SAISANJAYR/Sai-s-Portfolio/blob/main/iot-firmware";
+const PORTFOLIO_FW_TREE = "https://github.com/SAISANJAYR/Sai-s-Portfolio/tree/main/iot-firmware";
+const IOT_REPO_TREE = "https://github.com/SAISANJAYR/IOT/tree/main";
 
 /* ─────────────────────────────────────────────
    Shared tiny helpers
@@ -270,22 +275,102 @@ function ComparisonTable({
 /* ─────────────────────────────────────────────
    Sample CSV Preview Table
 ───────────────────────────────────────────── */
+const SAMPLE_CSV_PATH = "Task_05_Firebase_Logging_CSV/sample_sensor_telemetry.csv";
+
+function parseSampleCsv() {
+  const lines = (IOT_SOURCES[SAMPLE_CSV_PATH] ?? "").trim().split("\n").slice(1);
+  return lines.map((l) => {
+    const [time, temp, hum, light, bulb, mode] = l.split(",");
+    return { time, temp, hum, light, bulb, mode };
+  });
+}
+
+function downloadSampleCsv() {
+  const blob = new Blob([IOT_SOURCES[SAMPLE_CSV_PATH] ?? ""], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "iot_telemetry_2024-04-12.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* SVG line chart of the logged records (temperature, humidity, light) */
+function HistoryChart() {
+  const rows = parseSampleCsv();
+  const W = 720, H = 220, L = 44, R = 44, T = 16, B = 30;
+  const n = rows.length;
+  const x = (i: number) => L + (i * (W - L - R)) / Math.max(1, n - 1);
+  const yLeft = (v: number) => T + (1 - (v - 20) / 50) * (H - T - B); // 20 → 70 (°C / %)
+  const yRight = (v: number) => T + (1 - v / 4095) * (H - T - B);     // 0 → 4095 ADC
+  const path = (vals: number[], y: (v: number) => number) =>
+    vals.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const temp = rows.map((r) => Number(r.temp));
+  const hum = rows.map((r) => Number(r.hum));
+  const light = rows.map((r) => Number(r.light));
+
+  return (
+    <figure className="rounded-2xl border border-charcoal/15 bg-white shadow-sm p-4 my-3">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Logged temperature, humidity and light level over time">
+        {/* bulb ON bands */}
+        {rows.map((r, i) =>
+          r.bulb === "ON" && i < n - 1 ? (
+            <rect key={i} x={x(i)} y={T} width={x(i + 1) - x(i)} height={H - T - B} fill="#10b981" opacity={0.08} />
+          ) : null
+        )}
+        {[20, 30, 40, 50, 60, 70].map((v) => (
+          <g key={v}>
+            <line x1={L} x2={W - R} y1={yLeft(v)} y2={yLeft(v)} stroke="#e4e4e7" strokeWidth={1} />
+            <text x={L - 6} y={yLeft(v) + 3} fontSize={9} textAnchor="end" fill="#71717a" fontFamily="monospace">{v}</text>
+          </g>
+        ))}
+        {[0, 1000, 2000, 3000, 4095].map((v) => (
+          <text key={v} x={W - R + 6} y={yRight(v) + 3} fontSize={9} fill="#4f46e5" fontFamily="monospace">{v}</text>
+        ))}
+        {/* threshold line (1500 ADC) */}
+        <line x1={L} x2={W - R} y1={yRight(1500)} y2={yRight(1500)} stroke="#4f46e5" strokeDasharray="4 4" strokeWidth={1} />
+        <text x={L + 4} y={yRight(1500) - 4} fontSize={9} fill="#4f46e5" fontFamily="monospace">threshold 1500</text>
+        <path d={path(temp, yLeft)} fill="none" stroke="#b45309" strokeWidth={2} />
+        <path d={path(hum, yLeft)} fill="none" stroke="#0369a1" strokeWidth={2} />
+        <path d={path(light, yRight)} fill="none" stroke="#4f46e5" strokeWidth={2} />
+        {rows.map((r, i) =>
+          i % 3 === 0 ? (
+            <text key={i} x={x(i)} y={H - 10} fontSize={9} textAnchor="middle" fill="#71717a" fontFamily="monospace">
+              {r.time.slice(11, 19)}
+            </text>
+          ) : null
+        )}
+      </svg>
+      <figcaption className="flex flex-wrap gap-4 text-[10px] font-mono text-charcoal/70 mt-2">
+        <span><span className="inline-block w-3 h-0.5 bg-[#b45309] align-middle mr-1" />Temperature (°C, left axis)</span>
+        <span><span className="inline-block w-3 h-0.5 bg-[#0369a1] align-middle mr-1" />Humidity (%, left axis)</span>
+        <span><span className="inline-block w-3 h-0.5 bg-[#4f46e5] align-middle mr-1" />Light (ADC, right axis)</span>
+        <span><span className="inline-block w-3 h-2 bg-emerald-500/20 align-middle mr-1" />Bulb ON</span>
+      </figcaption>
+    </figure>
+  );
+}
+
 function CsvPreviewTable() {
-  const sampleData = [
-    { time: "2024-04-12T14:30:00Z", temp: "28.4", hum: "62.0", light: "1820", bulb: "OFF", mode: "AUTO" },
-    { time: "2024-04-12T14:30:05Z", temp: "28.4", hum: "62.1", light: "1815", bulb: "OFF", mode: "AUTO" },
-    { time: "2024-04-12T14:30:10Z", temp: "28.5", hum: "61.8", light: "1420", bulb: "ON", mode: "AUTO" },
-    { time: "2024-04-12T14:30:15Z", temp: "28.5", hum: "61.9", light: "1390", bulb: "ON", mode: "AUTO" },
-    { time: "2024-04-12T14:30:20Z", temp: "28.6", hum: "61.7", light: "1950", bulb: "OFF", mode: "MANUAL" },
-  ];
+  const sampleData = parseSampleCsv();
   return (
     <div className="overflow-x-auto rounded-2xl border border-charcoal/15 bg-white shadow-sm my-3 font-mono text-xs">
-      <div className="px-4 py-2.5 bg-zinc-100/90 border-b border-charcoal/10 flex items-center justify-between text-[11px] text-charcoal/70">
+      <div className="px-4 py-2.5 bg-zinc-100/90 border-b border-charcoal/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-charcoal/70">
         <span className="font-bold flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          Exported Dataset Snapshot: iot_telemetry_2024-04-12.csv
+          Exported Dataset Snapshot: iot_telemetry_2024-04-12.csv ({sampleData.length} records)
         </span>
-        <span className="text-[10px] text-zinc-500">RFC 4180 Compliant Comma-Separated</span>
+        <span className="flex items-center gap-2">
+          <span className="text-[10px] text-zinc-500">RFC 4180 comma-separated</span>
+          <button
+            onClick={downloadSampleCsv}
+            className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-charcoal text-white hover:bg-black"
+          >
+            ⬇ Download this CSV
+          </button>
+        </span>
       </div>
       <table className="w-full text-left">
         <thead className="bg-zinc-50 text-[10px] text-charcoal/70 uppercase border-b border-charcoal/10">
@@ -554,12 +639,251 @@ function TaskSection({
 /* ─────────────────────────────────────────────
    Sub-heading inside a task
 ───────────────────────────────────────────── */
-function Sub({ children }: { children: React.ReactNode }) {
+function Sub({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
-    <h3 className="text-[11px] font-mono font-bold uppercase tracking-[0.16em] text-charcoal/80 mb-3 flex items-center gap-2">
+    <h3
+      id={id}
+      className="text-[11px] font-mono font-bold uppercase tracking-[0.16em] text-charcoal/80 mb-3 flex items-center gap-2 scroll-mt-44"
+    >
       <span className="w-5 h-[2px] bg-charcoal/70 inline-block" />
       {children}
     </h3>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Body paragraph + definition panel helpers
+───────────────────────────────────────────── */
+function P({ children }: { children: React.ReactNode }) {
+  return <p className="text-sm text-charcoal/80 leading-relaxed font-body">{children}</p>;
+}
+
+function C({ children }: { children: React.ReactNode }) {
+  return (
+    <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">
+      {children}
+    </code>
+  );
+}
+
+function Panel({ title, tag, children }: { title: string; tag?: string; children: React.ReactNode }) {
+  return (
+    <div className="p-5 rounded-2xl border border-charcoal/15 bg-white shadow-sm space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-mono font-bold text-xs text-charcoal uppercase tracking-wide">{title}</span>
+        {tag && (
+          <span className="text-[10px] font-mono text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded shrink-0">{tag}</span>
+        )}
+      </div>
+      <div className="text-xs text-charcoal/75 leading-relaxed font-body space-y-2">{children}</div>
+    </div>
+  );
+}
+
+function Steps({ items }: { items: React.ReactNode[] }) {
+  return (
+    <ol className="space-y-2">
+      {items.map((it, i) => (
+        <li key={i} className="flex gap-3 items-start text-xs text-charcoal/80 font-body leading-relaxed">
+          <span className="w-5 h-5 shrink-0 rounded-full bg-charcoal text-white font-mono text-[10px] font-bold flex items-center justify-center mt-0.5">
+            {i + 1}
+          </span>
+          <span>{it}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Evaluation checklist coverage (per task)
+───────────────────────────────────────────── */
+function TaskChecklist({ items }: { items: { label: string; href: string }[] }) {
+  return (
+    <details open className="rounded-2xl border-2 border-emerald-300/70 bg-emerald-50/50 p-5 group">
+      <summary className="cursor-pointer list-none flex flex-wrap items-center justify-between gap-2">
+        <span className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-emerald-900 flex items-center gap-2">
+          <span className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[11px]">✓</span>
+          Evaluation Checklist — where each item is documented
+        </span>
+        <span className="text-[10px] font-mono text-emerald-800/80">
+          {items.length} items · click to jump · <span className="group-open:hidden">show</span>
+          <span className="hidden group-open:inline">hide</span>
+        </span>
+      </summary>
+      <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-4">
+        {items.map((it, i) => (
+          <li key={i}>
+            <a
+              href={it.href}
+              className="flex items-start gap-2 text-[11px] font-body text-emerald-950 hover:text-black hover:underline underline-offset-2"
+            >
+              <span className="text-emerald-600 font-bold mt-px">☑</span>
+              <span>{it.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Complete source viewer — renders the exact files
+   committed under /iot-firmware (tabs, copy, GitHub link)
+───────────────────────────────────────────── */
+function SourceFiles({ files }: { files: string[] }) {
+  const [active, setActive] = useState(files[0]);
+  const [copied, setCopied] = useState(false);
+  const code = IOT_SOURCES[active] ?? "";
+  const lines = code.split("\n").length;
+
+  const copy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-charcoal/30 bg-[#121316] text-[#e4e4e7] shadow-xl my-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-[#1c1d22] border-b border-white/10">
+        <div className="flex flex-wrap gap-1.5">
+          {files.map((f) => (
+            <button
+              key={f}
+              onClick={() => setActive(f)}
+              className={`text-[11px] font-mono px-2.5 py-1 rounded-md border transition-colors ${
+                f === active
+                  ? "bg-white text-black border-white font-bold"
+                  : "text-zinc-300 border-white/15 hover:border-white/40 hover:bg-white/10"
+              }`}
+            >
+              {f.split("/").slice(1).join("/")}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono text-zinc-400">{lines} lines</span>
+          <a
+            href={`${PORTFOLIO_FW}/${active}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] font-mono text-zinc-300 hover:text-white px-2.5 py-1 rounded-md border border-white/15 hover:border-white/40"
+          >
+            GitHub ↗
+          </a>
+          <button
+            onClick={copy}
+            className="text-[11px] font-mono text-zinc-300 hover:text-white px-2.5 py-1 rounded-md border border-white/15 hover:border-white/40 bg-white/5"
+          >
+            {copied ? "✓ Copied!" : "Copy"}
+          </button>
+        </div>
+      </div>
+      <div className="overflow-auto max-h-[560px] p-5">
+        <pre className="text-xs font-mono text-zinc-200 leading-relaxed whitespace-pre min-w-max">{code}</pre>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Repository file index (per task)
+───────────────────────────────────────────── */
+function RepoFiles({
+  folders,
+  files,
+  iotRepoFolder,
+}: {
+  folders: string[];
+  files: { path: string; note: string }[];
+  iotRepoFolder: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-charcoal/15 bg-white shadow-sm overflow-hidden">
+      <div className="px-5 py-3 bg-zinc-50 border-b border-charcoal/10 flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[11px] font-mono font-bold text-charcoal">
+          📁 Sai-s-Portfolio / iot-firmware / {folders.join(" + ")}
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {folders.map((f) => (
+            <a
+              key={f}
+              href={`${PORTFOLIO_FW_TREE}/${f}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md bg-charcoal text-white hover:bg-black"
+            >
+              Open {f} ↗
+            </a>
+          ))}
+          <a
+            href={`${IOT_REPO_TREE}/${iotRepoFolder}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border border-charcoal/20 text-charcoal hover:bg-zinc-100"
+          >
+            Lab manual (IOT repo) ↗
+          </a>
+        </div>
+      </div>
+      <ul className="divide-y divide-charcoal/10">
+        {files.map((f) => (
+          <li key={f.path} className="px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+            <a
+              href={`${PORTFOLIO_FW}/${f.path}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[11px] font-bold text-indigo-700 hover:underline"
+            >
+              {f.path}
+            </a>
+            <span className="text-[11px] text-charcoal/65 font-body">{f.note}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Three-lane data-flow diagram (device ⇄ cloud ⇄ client)
+───────────────────────────────────────────── */
+function DataFlowLanes({
+  lanes,
+  flows,
+}: {
+  lanes: { title: string; sub: string; items: string[] }[];
+  flows: { from: string; to: string; label: string }[];
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="grid md:grid-cols-3 gap-3">
+        {lanes.map((l, i) => (
+          <div key={i} className="rounded-2xl border-2 border-charcoal/15 bg-white p-4 shadow-sm">
+            <div className="font-mono text-xs font-bold text-charcoal">{l.title}</div>
+            <div className="text-[10px] font-mono text-charcoal/60 mb-2">{l.sub}</div>
+            <ul className="space-y-1">
+              {l.items.map((it, j) => (
+                <li key={j} className="text-[11px] font-mono text-charcoal/80 bg-zinc-50 border border-charcoal/10 rounded-md px-2 py-1">
+                  {it}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div className="rounded-2xl border border-charcoal/15 bg-zinc-50 p-4 space-y-1.5">
+        {flows.map((f, i) => (
+          <div key={i} className="grid grid-cols-[auto_auto_auto_1fr] items-center gap-2 text-[11px] font-mono">
+            <span className="px-2 py-0.5 rounded bg-charcoal text-white font-bold">{f.from}</span>
+            <span className="text-charcoal/60">──▶</span>
+            <span className="px-2 py-0.5 rounded bg-white border border-charcoal/20 font-bold text-charcoal">{f.to}</span>
+            <span className="text-charcoal/75 font-body">{f.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -666,7 +990,7 @@ function ESP32VirtualLab() {
         <div className="p-5 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between">
           <div>
             <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span>GPIO 26 · 250V Relay</span>
+              <span>GPIO 04 · 250V Relay</span>
               <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${relayActive ? "bg-amber-500/30 text-amber-300" : "bg-white/10 text-zinc-400"}`}>
                 {relayActive ? "COM → NO (CLOSED)" : "COM → NC (OPEN)"}
               </span>
@@ -749,7 +1073,7 @@ function ESP32VirtualLab() {
                   <div className="text-zinc-400">[BOOT] ESP32-WROOM-32 @ 240MHz</div>
                   <div className="text-cyan-400">[WIFI] Connected! IP: 192.168.1.50</div>
                   <div className="text-white">
-                    {ledOn ? "> HTTP GET /led/on → GPIO2 HIGH" : "> System Idle. Waiting for commands..."}
+                    {ledOn ? "> POST /on → GPIO2 HIGH → {\"state\":true}" : "> System Idle. Waiting for commands..."}
                   </div>
                 </div>
               ) : (
@@ -850,7 +1174,7 @@ function FirebaseTelemetryDashboard() {
     if (systemMode !== "MANUAL") return;
     const nextState = !manualRelay;
     setManualRelay(nextState);
-    addLog(`MANUAL ACTUATION: /current/bulbState updated to ${nextState ? "TRUE (ON)" : "FALSE (OFF)"}`);
+    addLog(`MANUAL ACTUATION: set(/current/relay) = "${nextState ? "ON" : "OFF"}" → ESP32 drives GPIO 4, reports /current/bulbState = ${nextState}`);
   };
 
   const handleLdrSlider = (val: number) => {
@@ -1035,7 +1359,7 @@ function FirebaseTelemetryDashboard() {
           )}
 
           <div className="text-[9px] font-mono text-zinc-500 text-center">
-            Relay Output: GPIO 26 · 230V Optocoupled
+            Relay Output: GPIO 4 · 230V Optocoupled
           </div>
         </div>
 
@@ -1250,10 +1574,9 @@ export default function IoTPageClient() {
               rows={[
                 { pin: "38-Pin SoC", component: "ESP32-WROOM-32", type: "3.3V Logic / 240 MHz Dual-Core", notes: "Core microcontroller running FreeRTOS and Arduino core" },
                 { pin: "GPIO 2", component: "Onboard SMD Blue LED", type: "Digital Output (Active HIGH)", notes: "Task 1 Local Web Server indicator" },
-                { pin: "GPIO 4", component: "2-Channel 5V Relay IN1", type: "Digital Output (Galvanic optocoupler)", notes: "Task 2 & 3 Mains incandescent lamp switching" },
-                { pin: "GPIO 4", component: "DHT11 Temp & Humidity", type: "Single-Wire Bidirectional Serial", notes: "Task 4 & 5 Environmental sensing (with 10k pullup)" },
-                { pin: "GPIO 34", component: "LDR Photoresistor", type: "Analog Input (12-bit ADC1, 0-4095)", notes: "Task 4 & 5 Ambient illuminance sensing on ADC1" },
-                { pin: "GPIO 26", component: "Mains Relay Control", type: "Digital Output (Active HIGH)", notes: "Task 4 & 5 Autonomous night-light relay trigger" },
+                { pin: "GPIO 4", component: "5V Optocoupled Relay IN1", type: "Digital Output (Active-LOW, optocoupled)", notes: "Tasks 2–5 · switches the 230V mains bulb (manual, voice and LDR-automatic control)" },
+                { pin: "GPIO 14", component: "DHT11 Temp & Humidity", type: "Single-Wire Bidirectional Serial", notes: "Tasks 4 & 5 · environmental sensing (10k pull-up to 3.3V)" },
+                { pin: "GPIO 34", component: "LDR Photoresistor", type: "Analog Input (12-bit ADC1, 0-4095)", notes: "Tasks 4 & 5 · ambient light sensing on ADC1 (works while Wi-Fi is on)" },
                 { pin: "VIN (5V)", component: "External 5V Power Rail", type: "Power Supply", notes: "Relay coil actuation supply" },
                 { pin: "GND", component: "Common Ground Rail", type: "0V Reference", notes: "Ties ESP32 ground and relay ground together" },
               ]}
@@ -1273,13 +1596,37 @@ export default function IoTPageClient() {
           title="ESP32 Web Server & HTML LED Control"
           tag="HTTP / LOCAL"
         >
+          <TaskChecklist
+            items={[
+              { label: "Objective of the assignment and the problem being addressed", href: "#t1-objective" },
+              { label: "Basic concept of an ESP32 Web Server", href: "#t1-concepts" },
+              { label: "How the ESP32 and browser communicate over Wi-Fi", href: "#t1-wifi" },
+              { label: "Hardware components used", href: "#t1-hardware" },
+              { label: "Circuit/wiring diagram", href: "#t1-wiring" },
+              { label: "ESP32 pin connections", href: "#t1-wiring" },
+              { label: "Complete Arduino/ESP32 source code", href: "#t1-code" },
+              { label: "HTML interface developed for controlling the LED", href: "#t1-html" },
+              { label: "How the webpage sends a command to the ESP32", href: "#t1-command" },
+              { label: "Photographs of the physical setup", href: "#t1-evidence" },
+              { label: "Screenshots of the web interface", href: "#t1-evidence" },
+              { label: "Problems encountered and how they were solved", href: "#t1-problems" },
+              { label: "Brief reflection on what you learned", href: "#t1-reflection" },
+              { label: "All required files/code available in your repository", href: "#t1-repo" },
+            ]}
+          />
+
           <div>
-            <Sub>Objective &amp; Problem Statement</Sub>
+            <Sub id="t1-objective">Objective &amp; Problem Statement</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
               Host a lightweight HTTP web server directly on the ESP32 with zero external cloud dependencies.
               The ESP32 connects in station mode (STA) to a local Wi-Fi router, listens on port 80, and serves an
               HTML control panel entirely from flash memory. Any client device on the same subnet can visit the
-              ESP32&apos;s IP address and actuate the onboard GPIO 2 LED via simple HTTP GET endpoints.
+              ESP32&apos;s IP address and switch the GPIO 2 LED ON/OFF through simple HTTP endpoints (<C>/on</C>, <C>/off</C>, <C>/status</C>).
+            </p>
+            <p className="text-xs text-charcoal/70 leading-relaxed font-body mt-3">
+              <b>Problem addressed:</b> an embedded board normally needs a physical button or a USB serial cable to be
+              controlled. Running a web server on the chip itself turns any phone or laptop on the same Wi-Fi into a
+              remote control — no app to install and no cloud account needed.
             </p>
           </div>
 
@@ -1290,7 +1637,14 @@ export default function IoTPageClient() {
           />
 
           <div>
-            <Sub>Core Concepts</Sub>
+            <Sub id="t1-concepts">Core Concepts — What an ESP32 Web Server Is</Sub>
+            <p className="text-xs text-charcoal/75 leading-relaxed font-body mb-3">
+              An <b>ESP32 web server</b> is a small program running on the microcontroller that listens for HTTP requests
+              on TCP port 80, the same way a website server does. When a browser asks for <C>/</C> it sends back an HTML
+              page; when the browser asks for <C>/on</C> or <C>/off</C> the server runs a C++ handler that changes the GPIO
+              pin and replies with the new state. The Arduino <C>WebServer</C> library does the request parsing; my code only
+              registers a handler per URL with <C>server.on()</C> and calls <C>server.handleClient()</C> in <C>loop()</C>.
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <ConceptCard term="ESP32-WROOM-32" def="Dual-core Xtensa 32-bit LX6 SoC with integrated Wi-Fi and Bluetooth BLE, programmed via Arduino IDE." />
               <ConceptCard term="Wi-Fi Station (STA) Mode" def="The ESP32 connects as a client to an existing access point and gets assigned a local IPv4 address via DHCP." />
@@ -1302,7 +1656,7 @@ export default function IoTPageClient() {
           </div>
 
           <div>
-            <Sub>Architecture &amp; Wi-Fi Request Flow</Sub>
+            <Sub id="t1-wifi">How the ESP32 and Browser Communicate over Wi-Fi</Sub>
             <div className="grid md:grid-cols-2 gap-6 items-center">
               <div className="flex justify-center">
                 <ArchDiagram steps={["Browser Client (Laptop / Phone)", "Local 2.4GHz Wi-Fi Subnet", "ESP32 WebServer (Port 80)", "GPIO 2 (digitalWrite)", "Onboard Blue LED"]} />
@@ -1311,7 +1665,10 @@ export default function IoTPageClient() {
                 <div className="p-4 rounded-xl border border-charcoal/15 bg-white shadow-sm">
                   <div className="text-[10px] font-mono text-charcoal/70 uppercase tracking-widest mb-1.5 font-bold">Request Pipeline</div>
                   <p className="text-xs text-charcoal/75 leading-relaxed font-body">
-                    When the user visits <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">http://192.168.1.50/</code> in their browser, the ESP32 handles the request on port 80, executes <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">digitalWrite(2, HIGH)</code> or <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1.5 py-0.5 rounded text-[11px]">LOW</code>, illuminates the onboard blue LED, and serves the dark mode control panel.
+                    The ESP32 joins the router in station mode and gets an IP by DHCP (printed on the Serial Monitor). Both the
+                    phone/laptop and the ESP32 are now on the same 2.4 GHz subnet, so the browser opens a TCP connection to
+                    <C>http://&lt;esp32-ip&gt;:80</C>. <C>GET /</C> returns the control page; a button press sends
+                    <C>POST /on</C> or <C>POST /off</C>; the ESP32 runs <C>digitalWrite(2, HIGH/LOW)</C> and answers with JSON.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-charcoal/15 bg-white shadow-sm">
@@ -1325,90 +1682,130 @@ export default function IoTPageClient() {
           </div>
 
           <div>
-            <Sub>ESP32 Pin Connections &amp; Circuit Wiring</Sub>
+            <Sub id="t1-wiring">Circuit / Wiring Diagram &amp; ESP32 Pin Connections</Sub>
             <PinTable
               rows={[
-                { pin: "GPIO 2", component: "Onboard Blue SMD LED", type: "Digital Output (3.3V Logic)", notes: "Drives LED cathode/anode circuit. HIGH = Illuminated, LOW = Off." },
-                { pin: "GND", component: "Common Ground Rail", type: "0V Reference", notes: "Ground reference for the ESP32 development board." },
-                { pin: "VIN / 3V3", component: "Micro-USB 5V / 3.3V Regulator", type: "Power Supply", notes: "Powers the ESP32 SoC via AMS1117-3.3 linear voltage regulator." },
+                { pin: "GPIO 2", component: "Onboard blue SMD LED + external 5mm LED", type: "Digital Output (3.3V Logic)", notes: "HIGH = LED ON, LOW = LED OFF. Drives the onboard LED and (optionally) a breadboard LED." },
+                { pin: "GPIO 2 → 220Ω", component: "Resistor R1 → LED anode (+, long leg)", type: "I = (3.3 V − Vf) / 220 Ω → a few mA", notes: "Keeps the GPIO far below its 40 mA absolute maximum." },
+                { pin: "GND", component: "LED cathode (−, short leg)", type: "0V Reference", notes: "Return path for the LED current; common ground of the board." },
+                { pin: "VIN / 3V3", component: "Micro-USB 5V / 3.3V Regulator", type: "Power Supply", notes: "USB powers the board; the onboard AMS1117 regulator makes 3.3V for the ESP32." },
               ]}
             />
+            <div className="mt-4">
+              <MediaImage
+                src="/media/task1_led_circuit.jpg"
+                alt="Task 1 wiring diagram: ESP32 GPIO 2 to 220 ohm resistor to LED anode, LED cathode to GND"
+                caption="Wiring diagram: ESP32 GPIO 2 → 220 Ω resistor → LED anode; LED cathode → GND (onboard LED on GPIO 2 lights at the same time)"
+              />
+            </div>
           </div>
 
           <div>
-            <Sub>Hardware &amp; Tooling Bill of Materials</Sub>
+            <Sub id="t1-hardware">Hardware Components Used &amp; Tooling</Sub>
             <HardwareList items={[
-              { icon: "🔌", name: "ESP32 Dev Board", note: "ESP32-WROOM-32 38-pin development board" },
-              { icon: "🔗", name: "Micro-USB Data Cable", note: "Powers module and enables flashing over CP2102 UART" },
+              { icon: "🔌", name: "ESP32 Dev Board", note: "ESP32-WROOM-32 DevKit V1 — dual-core 240 MHz, 2.4 GHz Wi-Fi" },
+              { icon: "💡", name: "Onboard LED (GPIO 2)", note: "Built-in surface-mount blue LED on the dev board" },
+              { icon: "🔵", name: "5mm LED + 220 Ω resistor", note: "Optional external indicator on the breadboard, same GPIO 2" },
+              { icon: "🧩", name: "Breadboard + jumper wires", note: "Solderless breadboard and male-to-male DuPont wires" },
+              { icon: "🔗", name: "Micro-USB Data Cable", note: "Powers module and enables flashing over the CP2102 USB-UART" },
               { icon: "📶", name: "2.4 GHz Wi-Fi Network", note: "Router providing DHCP IP allocation" },
               { icon: "💻", name: "Arduino IDE 2.x", note: "Configured with espressif/arduino-esp32 board package" },
-              { icon: "📦", name: "WebServer.h Library", note: "Native non-blocking HTTP server included in ESP32 core" },
-              { icon: "💡", name: "Onboard LED (GPIO 2)", note: "Built-in surface-mount blue LED on the dev board" },
+              { icon: "📦", name: "WiFi.h + WebServer.h", note: "Wi-Fi stack and HTTP server included in the ESP32 core" },
             ]} />
           </div>
 
           <div>
-            <Sub>Firmware Implementation &amp; HTML Generation</Sub>
-            <CodeBlock filename="Task_01_ESP32_WebServer_LED.ino" code={`#include <WiFi.h>
-#include <WebServer.h>
+            <Sub id="t1-html">HTML Interface Developed for Controlling the LED</Sub>
+            <div className="grid md:grid-cols-2 gap-4 mb-3">
+              <Panel title="What the page contains" tag="served from flash">
+                <p>
+                  The whole interface — HTML, CSS and JavaScript — is one string, <C>INDEX_HTML</C>, stored in flash with
+                  <C>PROGMEM</C> and sent by <C>handleRoot()</C>. It shows a card with a live status badge (IP address),
+                  the device name, a <b>TURN ON</b> and a <b>TURN OFF</b> button, and a footer that shows the current LED
+                  output.
+                </p>
+              </Panel>
+              <Panel title="Why it is built this way" tag="no page reloads">
+                <p>
+                  The buttons call <C>fetch()</C> instead of following links, so the page never reloads — it just updates
+                  the status text from the JSON reply. A <C>setInterval</C> polls <C>/status</C> every 3 s, so if two people
+                  have the page open, both see the same state.
+                </p>
+              </Panel>
+            </div>
+            <CodeBlock
+              filename="INDEX_HTML — buttons & script (excerpt of the complete file below)"
+              code={`<div class="btn-grid">
+  <button class="btn-on"  onclick="setLed(true)"><span>&#x1F4A1;</span> TURN ON</button>
+  <button class="btn-off" onclick="setLed(false)"><span>&#x25CB;</span> TURN OFF</button>
+</div>
+<div class="footer-panel">
+  <div>Control Panel &bull; Current Output: <span id="led-state" class="state-indicator">OFF</span></div>
+</div>
 
-const char* ssid     = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-
-WebServer server(80);
-const int ledPin = 2;
-
-void handleRoot() {
-  String html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width, initial-scale=1.0'>";
-  html += "<title>ESP32 Local Web Control</title>";
-  html += "<style>body{font-family:sans-serif; text-align:center; padding:40px 20px; background:#f4f4f5;}";
-  html += ".btn{display:inline-block; padding:12px 24px; margin:8px; font-weight:bold; color:#fff; text-decoration:none; border-radius:8px;}";
-  html += ".btn-on{background:#10b981;} .btn-off{background:#ef4444;}</style></head><body>";
-  html += "<h2>ESP32 Local Web Control</h2>";
-  html += "<p>Status: <b>" + String(digitalRead(ledPin) ? "ON" : "OFF") + "</b></p>";
-  html += "<a href='/led/on' class='btn btn-on'>TURN ON</a>";
-  html += "<a href='/led/off' class='btn btn-off'>TURN OFF</a>";
-  html += "</body></html>";
-  server.send(200, "text/html", html);
-}
-
-void handleLedOn() {
-  digitalWrite(ledPin, HIGH);
-  server.sendHeader("Location", "/");
-  server.send(303);
-}
-
-void handleLedOff() {
-  digitalWrite(ledPin, LOW);
-  server.sendHeader("Location", "/");
-  server.send(303);
-}
-
-void setup() {
-  Serial.begin(115200);
-  pinMode(ledPin, OUTPUT);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+<script>
+  async function setLed(state) {
+    const endpoint = state ? '/on' : '/off';
+    const res  = await fetch(endpoint, { method: 'POST' });   // command to the ESP32
+    const data = await res.json();                            // {"status":"ok","state":true}
+    updateUI(data.state);
   }
-  Serial.print("\\nConnected! IP: ");
-  Serial.println(WiFi.localIP());
-
-  server.on("/",        handleRoot);
-  server.on("/led/on",  handleLedOn);
-  server.on("/led/off", handleLedOff);
-  server.begin();
-  Serial.println("HTTP Server started on port 80");
-}
-
-void loop() {
-  server.handleClient();
-}`} />
+  async function checkStatus() {                              // keeps the page in sync
+    const res  = await fetch('/status');
+    const data = await res.json();
+    updateUI(data.state);
+    document.getElementById('ip-addr').innerText = data.ip;
+  }
+  setInterval(checkStatus, 3000);
+  checkStatus();
+</script>`}
+            />
           </div>
 
           <div>
-            <Sub>Problems Encountered &amp; Debugging Log</Sub>
+            <Sub id="t1-command">How the Webpage Sends a Command to the ESP32</Sub>
+            <div className="grid md:grid-cols-2 gap-6 items-start">
+              <Steps
+                items={[
+                  <>The user taps <b>TURN ON</b>. The button&apos;s <C>onclick</C> calls <C>setLed(true)</C>.</>,
+                  <>The browser sends an HTTP request <C>POST /on</C> over Wi-Fi to the ESP32&apos;s IP on port 80.</>,
+                  <><C>server.handleClient()</C> in <C>loop()</C> reads the request and the route table (<C>server.on(&quot;/on&quot;, HTTP_ANY, handleLedOn)</C>) picks the handler.</>,
+                  <><C>handleLedOn()</C> runs <C>digitalWrite(LED_PIN, HIGH)</C> — GPIO 2 goes to 3.3 V and the LED lights.</>,
+                  <>The ESP32 replies <C>200</C> with <C>{"{\"status\":\"ok\",\"state\":true}"}</C>; the page calls <C>updateUI(true)</C> and shows <b>ON (ACTIVE)</b>.</>,
+                  <>Because the route accepts <C>HTTP_ANY</C>, typing <C>http://&lt;ip&gt;/on</C> straight into the address bar (a GET) also works — handy for testing.</>,
+                ]}
+              />
+              <CodeBlock
+                filename="HTTP exchange (browser ⇄ ESP32 :80)"
+                code={`Browser                               ESP32 WebServer :80
+───────                               ───────────────────
+GET /            ───────────────────▶ handleRoot()
+                 ◀─────────────────── 200 text/html (INDEX_HTML)
+
+POST /on         ───────────────────▶ handleLedOn()
+                                       digitalWrite(2, HIGH)  → LED ON
+                 ◀─────────────────── 200 {"status":"ok","state":true}
+
+POST /off        ───────────────────▶ handleLedOff()
+                                       digitalWrite(2, LOW)   → LED OFF
+                 ◀─────────────────── 200 {"status":"ok","state":false}
+
+GET /status      ───────────────────▶ handleStatus()   (every 3 s)
+                 ◀─────────────────── 200 {"state":false,"ip":"192.168.x.x","uptime":184}`}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t1-code">Complete Arduino / ESP32 Source Code</Sub>
+            <p className="text-xs text-charcoal/70 font-body mb-2">
+              The full sketch exactly as committed in the repository (Wi-Fi credentials replaced with placeholders).
+            </p>
+            <SourceFiles files={["Task_01_ESP32_WebServer_LED/Task_01_ESP32_WebServer_LED.ino"]} />
+          </div>
+
+          <div>
+            <Sub id="t1-problems">Problems Encountered &amp; How They Were Solved</Sub>
             <TroubleshootCard
               items={[
                 {
@@ -1458,8 +1855,14 @@ void loop() {
           </div>
 
           <div>
-            <Sub>Lab Verification &amp; Evidence</Sub>
+            <Sub id="t1-evidence">Photographs of the Physical Setup &amp; Screenshots of the Web Interface</Sub>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <MediaImage
+                src="/media/esp32_led_on_hardware.png"
+                alt="ESP32 board held in front of a browser showing LED is ON at the ESP32 IP address /on, onboard blue LED lit"
+                caption="Physical test: browser at the ESP32's IP (192.168.56.202/on) reports “LED is ON” while the board's blue GPIO 2 LED is lit"
+                wide
+              />
               <MediaImage
                 src="/media/task1_web_ui.jpg"
                 alt="ESP32 Local Web Control interface hosted at http://192.168.1.50/"
@@ -1473,7 +1876,22 @@ void loop() {
             </div>
           </div>
 
-          <Reflection text="Building an HTTP server directly on bare silicon made the client-server model click in a visceral way. Seeing a browser communicate with a microcontroller without any intermediate cloud server was empowering. It also exposed key hardware constraints: the chip handles one TCP socket at a time, and the entire HTML page lives in volatile C++ heap memory." />
+          <div>
+            <Sub id="t1-repo">All Required Files / Code in the Repository</Sub>
+            <RepoFiles
+              folders={["Task_01_ESP32_WebServer_LED"]}
+              iotRepoFolder="Task-01-ESP32-WebServer-LED"
+              files={[
+                { path: "Task_01_ESP32_WebServer_LED/Task_01_ESP32_WebServer_LED.ino", note: "Complete firmware incl. embedded HTML/CSS/JS interface" },
+                { path: "README.md", note: "File index, pin map, libraries for all five tasks" },
+              ]}
+            />
+          </div>
+
+          <div id="t1-reflection" className="scroll-mt-44">
+            <Sub>Brief Reflection — What I Learned</Sub>
+            <Reflection text="Building an HTTP server directly on bare silicon made the client-server model click in a visceral way. Seeing a browser communicate with a microcontroller without any intermediate cloud server was empowering. It also exposed key hardware constraints: the WebServer library serves one client at a time from loop(), the page has to fit in flash as a PROGMEM string, and the device is only reachable from inside the local network." />
+          </div>
         </TaskSection>
 
         {/* ══════════════════════════════════════
@@ -1486,6 +1904,30 @@ void loop() {
           title="Adafruit IO Dashboard & MQTT Protocol"
           tag="MQTT / CLOUD"
         >
+          <TaskChecklist
+            items={[
+              { label: "Purpose of Adafruit IO in an IoT system", href: "#t2-purpose" },
+              { label: "Basic concept of MQTT", href: "#t2-concepts" },
+              { label: "MQTT Publisher, Subscriber, and Broker identified", href: "#t2-roles" },
+              { label: "Role of an MQTT Topic/Feed", href: "#t2-topics" },
+              { label: "Hardware and software used", href: "#t2-hardware" },
+              { label: "Adafruit IO account created and documented", href: "#t2-setup" },
+              { label: "Dashboard and feed configuration documented", href: "#t2-setup" },
+              { label: "Communication flow between ESP32, MQTT, and Adafruit IO", href: "#t2-flow" },
+              { label: "MQTT topic/feed structure used", href: "#t2-topics" },
+              { label: "Complete ESP32 source code", href: "#t2-code" },
+              { label: "Explanation of important code sections", href: "#t2-explain" },
+              { label: "Photographs of the hardware setup", href: "#t2-evidence" },
+              { label: "Screenshots of the Adafruit IO dashboard", href: "#t2-evidence" },
+              { label: "LED control through the cloud dashboard demonstrated", href: "#t2-evidence" },
+              { label: "Working demonstration video", href: "#t2-evidence" },
+              { label: "Problems encountered during MQTT/cloud setup", href: "#t2-problems" },
+              { label: "Solutions implemented", href: "#t2-problems" },
+              { label: "Brief learning reflection", href: "#t2-reflection" },
+              { label: "All required files available in your repository", href: "#t2-repo" },
+            ]}
+          />
+
           <div>
             <Sub>Objective &amp; Problem Statement</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
@@ -1503,7 +1945,28 @@ void loop() {
           />
 
           <div>
-            <Sub>Core Concepts &amp; Architecture Roles</Sub>
+            <Sub id="t2-purpose">Purpose of Adafruit IO in an IoT System</Sub>
+            <div className="grid md:grid-cols-3 gap-3">
+              <Panel title="Cloud MQTT broker" tag="io.adafruit.com:1883">
+                <p>Gives the ESP32 a public server to connect <i>out</i> to. No port-forwarding or public IP is needed at home or in the lab — the board keeps one outgoing TCP connection open.</p>
+              </Panel>
+              <Panel title="Data store (feeds)" tag="time-series">
+                <p>Every value published to a feed is saved with a timestamp, so the history of ON/OFF commands can be viewed or downloaded later.</p>
+              </Panel>
+              <Panel title="Ready-made dashboard" tag="no front-end code">
+                <p>Toggle, gauge and chart blocks are linked to feeds by clicking, so a phone-friendly control panel exists without writing any web code. It also exposes a REST API that IFTTT uses in Task 3.</p>
+              </Panel>
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t2-concepts">Basic Concept of MQTT &amp; Architecture Roles</Sub>
+            <p className="text-xs text-charcoal/75 leading-relaxed font-body mb-3">
+              <b>MQTT</b> (Message Queuing Telemetry Transport) is a publish/subscribe protocol that runs over TCP. Clients never
+              talk to each other directly: a <b>publisher</b> sends a message to a named <b>topic</b> on a central <b>broker</b>, and
+              the broker forwards it to every client that has <b>subscribed</b> to that topic. Headers are as small as 2 bytes and the
+              connection stays open, so a device receives commands the moment they are sent instead of polling a server.
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <ConceptCard term="MQTT Protocol" def="Extremely lightweight publish-subscribe messaging transport with minimal 2-byte header overhead for low-bandwidth IoT." />
               <ConceptCard term="MQTT Broker" def="Central cloud message exchange (io.adafruit.com). Routes packets between publishers and subscribers across port 1883." />
@@ -1515,23 +1978,87 @@ void loop() {
           </div>
 
           <div>
-            <Sub>MQTT Entities &amp; Identified Roles</Sub>
+            <Sub id="t2-roles">MQTT Publisher, Subscriber &amp; Broker — Identified Roles</Sub>
             <ComparisonTable
               headers={["Entity Role", "Hardware / Service", "Protocol & Port", "Action & Responsibility"]}
               rows={[
                 ["MQTT Broker", "io.adafruit.com", "TCP 1883 (Plain) / 8883 (SSL)", "Authenticates AIO credentials, maintains persistent sockets, routes feed messages."],
                 ["MQTT Publisher", "Adafruit IO Web Dashboard", "HTTPS / WebSocket bridge", "Publishes 'ON' / 'OFF' payload when user taps the dashboard toggle switch."],
                 ["MQTT Subscriber", "ESP32-WROOM-32", "TCP 1883 (Adafruit_MQTT_Client)", "Subscribes to 'Sai__0077/feeds/bulb-control', decodes payload, drives GPIO 4."],
+                ["MQTT Publisher (feedback)", "ESP32-WROOM-32", "TCP 1883 (Adafruit_MQTT_Publish)", "Publishes 'ESP32 Online & Ready' / 'Relay State: ON|OFF' to 'Sai__0077/feeds/device-status'."],
                 ["Actuator Load", "2-Channel 5V Relay + Lamp", "230V AC Mains Circuit", "Optocoupler energizes electromagnetic coil, closing Normally Open contacts."],
               ]}
             />
           </div>
 
           <div>
+            <Sub id="t2-topics">Role of an MQTT Topic / Feed &amp; the Topic Structure Used</Sub>
+            <p className="text-xs text-charcoal/75 leading-relaxed font-body mb-3">
+              A <b>topic</b> is the address a message is published to; the broker uses it to decide who receives the message.
+              In Adafruit IO every <b>feed</b> <i>is</i> a topic, named <C>{"{username}"}/feeds/{"{feed_key}"}</C>. The dashboard
+              toggle writes to the feed, the feed stores the value, and the broker pushes it to the ESP32 because the ESP32
+              subscribed to exactly that topic. Using two feeds keeps commands (cloud → device) separate from status (device → cloud).
+            </p>
+            <ComparisonTable
+              headers={["MQTT Topic", "Direction", "Published By", "Subscribed By", "Payloads"]}
+              rows={[
+                ["Sai__0077/feeds/bulb-control", "Cloud → ESP32 (command)", "Adafruit IO Toggle block; IFTTT in Task 3", "ESP32 (relayFeed)", "\"ON\" / \"OFF\" (also accepts \"1\" / \"0\")"],
+                ["Sai__0077/feeds/device-status", "ESP32 → Cloud (status)", "ESP32 (statusFeed)", "Adafruit IO (stored; viewable on the feed page)", "\"ESP32 Online & Ready\", \"Relay State: ON\" / \"OFF\""],
+                ["Sai__0077/errors · Sai__0077/throttle", "Broker → client (system)", "Adafruit IO", "Optional, for debugging", "Error / rate-limit messages (not used in the firmware)"],
+              ]}
+            />
+            <p className="text-[11px] text-charcoal/60 font-mono mt-2">
+              Note: the public template in the IOT lab-manual repo uses the generic feed key <C>relay-control</C>; on my account the feed is <C>bulb-control</C> — only the feed key string changes.
+            </p>
+          </div>
+
+          <div>
+            <Sub id="t2-hardware">Hardware &amp; Software Used</Sub>
+            <HardwareList items={[
+              { icon: "🔌", name: "ESP32 DevKit V1", note: "MQTT client with built-in 2.4 GHz Wi-Fi" },
+              { icon: "⚡", name: "5V optocoupled relay module", note: "Active-LOW input, switches the 230V AC lamp (COM/NO contacts)" },
+              { icon: "💡", name: "230V incandescent bulb + holder", note: "The AC load being controlled" },
+              { icon: "🔗", name: "Jumper wires, mains cord, terminal blocks", note: "DC signal wiring and safely clamped AC wiring" },
+              { icon: "☁️", name: "Adafruit IO (free tier)", note: "MQTT broker, feeds and dashboard — user Sai__0077" },
+              { icon: "📦", name: "Adafruit MQTT Library", note: "Adafruit_MQTT_Client, Subscribe and Publish classes" },
+              { icon: "💻", name: "Arduino IDE 2.x + ESP32 core", note: "Compile, flash, Serial Monitor at 115200 baud" },
+              { icon: "🌐", name: "Any browser / phone", note: "Opens the Adafruit IO dashboard from anywhere" },
+            ]} />
+          </div>
+
+          <div>
+            <Sub id="t2-setup">Adafruit IO Account, Dashboard &amp; Feed Configuration</Sub>
+            <div className="grid md:grid-cols-2 gap-6 items-start">
+              <Steps
+                items={[
+                  <>Created a free account at <C>io.adafruit.com</C> — username <b>Sai__0077</b>.</>,
+                  <>Opened the yellow <b>key icon</b> (My Key) and copied <C>AIO_USERNAME</C> and <C>AIO_KEY</C> into <C>config.h</C> (the key is never committed).</>,
+                  <><b>Feeds → New Feed</b>: name <i>Bulb Control</i>, key <C>bulb-control</C>. The <C>device-status</C> feed is created automatically the first time the ESP32 publishes to it.</>,
+                  <><b>Dashboards → New Dashboard</b>: <i>Bulb Control</i> (<C>io.adafruit.com/Sai__0077/dashboards/bulb-control</C>).</>,
+                  <><b>New Block → Toggle</b>, linked to feed <C>bulb-control</C>; ON text/value = <C>ON</C>, OFF text/value = <C>OFF</C>.</>,
+                  <>Flipped the toggle and watched the payload arrive on the Serial Monitor before wiring the mains side.</>,
+                ]}
+              />
+              <ComparisonTable
+                headers={["Setting", "Value"]}
+                rows={[
+                  ["Broker host / port", "io.adafruit.com : 1883 (8883 with TLS)"],
+                  ["Username", "Sai__0077"],
+                  ["Command feed key", "bulb-control"],
+                  ["Status feed key", "device-status"],
+                  ["Dashboard", "Bulb Control"],
+                  ["Block", "Toggle → bulb-control, values ON / OFF"],
+                  ["Free-tier limit", "30 data points / minute"],
+                ]}
+              />
+            </div>
+          </div>
+
+          <div>
             <Sub>ESP32 Pin Connections &amp; Relay Wiring</Sub>
             <PinTable
               rows={[
-                { pin: "GPIO 4", component: "Relay IN1 Pin", type: "Digital Output (Active HIGH)", notes: "Control signal triggering the optocoupler transistor on Relay Channel 1." },
+                { pin: "GPIO 4", component: "Relay IN1 Pin", type: "Digital Output (Active-LOW)", notes: "LOW energizes the optocoupler/coil (RELAY_ACTIVE), HIGH releases it." },
                 { pin: "VIN (5V)", component: "Relay VCC Pin", type: "5V DC Power Supply", notes: "Provides 5V coil excitation current (draws ~70mA when energized)." },
                 { pin: "GND", component: "Relay GND Pin", type: "Common Ground (0V)", notes: "Common ground reference between ESP32 and relay board." },
                 { pin: "Relay COM", component: "Mains Live Wire (L)", type: "230V AC High Voltage", notes: "Common terminal breaking the hot line of the household mains supply." },
@@ -1548,7 +2075,18 @@ void loop() {
           </div>
 
           <div>
-            <Sub>System Architecture</Sub>
+            <Sub id="t2-flow">Communication Flow: ESP32 ⇄ MQTT ⇄ Adafruit IO</Sub>
+            <div className="mb-4">
+              <Steps
+                items={[
+                  <>On boot the ESP32 joins Wi-Fi, opens a TCP socket to <C>io.adafruit.com:1883</C> and sends MQTT <b>CONNECT</b> with username + AIO key.</>,
+                  <>It sends <b>SUBSCRIBE</b> for <C>Sai__0077/feeds/bulb-control</C> and <b>PUBLISH</b>es “ESP32 Online &amp; Ready” to <C>device-status</C>.</>,
+                  <>The user flips the dashboard toggle → Adafruit IO saves <C>ON</C> in the feed and the broker <b>PUBLISH</b>es it to every subscriber.</>,
+                  <>The ESP32 receives the packet inside <C>mqtt.readSubscription()</C>, compares the payload and drives GPIO 4 LOW → relay clicks → bulb ON.</>,
+                  <>The ESP32 publishes “Relay State: ON” back to <C>device-status</C>; <b>PINGREQ/PINGRESP</b> keep the socket alive between commands.</>,
+                ]}
+              />
+            </div>
             <div className="grid md:grid-cols-2 gap-6 items-center">
               <div className="flex justify-center">
                 <ArchDiagram steps={["Adafruit IO Web Dashboard", "MQTT Broker (io.adafruit.com:1883)", "ESP32 (MQTT Subscriber Client)", "Optocoupler Relay (GPIO 4)", "230V AC Incandescent Bulb"]} />
@@ -1558,7 +2096,7 @@ void loop() {
                   <div className="text-[10px] font-mono text-charcoal/70 uppercase tracking-widest mb-1.5 font-bold">Payload Handling</div>
                   <p className="text-xs text-charcoal/75 leading-relaxed font-body">
                     When toggled, Adafruit IO pushes string payloads <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1 py-0.5 rounded text-[11px]">&quot;ON&quot;</code> or <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1 py-0.5 rounded text-[11px]">&quot;OFF&quot;</code>.
-                    The ESP32 callback compares the buffer via <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1 py-0.5 rounded text-[11px]">strcmp()</code> and toggles GPIO 4.
+                    The ESP32 compares the received buffer with <code className="font-mono text-charcoal bg-zinc-100 border border-charcoal/15 px-1 py-0.5 rounded text-[11px]">strcmp()</code> and toggles GPIO 4.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-charcoal/15 bg-white shadow-sm">
@@ -1572,78 +2110,55 @@ void loop() {
           </div>
 
           <div>
-            <Sub>Firmware Implementation (MQTT Client)</Sub>
-            <CodeBlock filename="Task_02_Adafruit_MQTT_Relay.ino" code={`#include <WiFi.h>
-#include "Adafruit_MQTT.h"
-#include "Adafruit_MQTT_Client.h"
-
-#define AIO_SERVER      "io.adafruit.com"
-#define AIO_SERVERPORT  1883
-#define AIO_USERNAME    "Sai__0077"
-#define AIO_KEY         "YOUR_ADAFRUIT_IO_KEY"
-
-WiFiClient client;
-Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
-
-Adafruit_MQTT_Subscribe relayFeed =
-  Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/bulb-control");
-
-const int RELAY_PIN = 4;
-
-void setup() {
-  Serial.begin(115200);
-  pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, LOW);
-
-  WiFi.begin("YOUR_WIFI_SSID", "YOUR_WIFI_PASSWORD");
-  while (WiFi.status() != WL_CONNECTED) delay(500);
-
-  mqtt.subscribe(&relayFeed);
-  Serial.println("Subscribed to Adafruit IO bulb-control feed!");
-}
-
-void loop() {
-  if (!mqtt.connected()) {
-    int8_t ret;
-    while ((ret = mqtt.connect()) != 0) {
-      Serial.println(mqtt.connectErrorString(ret));
-      mqtt.disconnect();
-      delay(5000);
-    }
-  }
-
-  Adafruit_MQTT_Subscribe* sub;
-  while ((sub = mqtt.readSubscription(2000))) {
-    if (sub == &relayFeed) {
-      char* msg = (char*)relayFeed.lastread;
-      Serial.print("Received: ");
-      Serial.println(msg);
-
-      if (strcmp(msg, "ON") == 0)  digitalWrite(RELAY_PIN, HIGH);
-      if (strcmp(msg, "OFF") == 0) digitalWrite(RELAY_PIN, LOW);
-    }
-  }
-}`} />
+            <Sub id="t2-code">Complete ESP32 Source Code (MQTT Client)</Sub>
+            <p className="text-xs text-charcoal/70 font-body mb-2">
+              Two files: the sketch and <C>config.h</C> with the Wi-Fi and Adafruit IO credentials (key replaced by a placeholder).
+            </p>
+            <SourceFiles
+              files={[
+                "Task_02_Adafruit_MQTT_Relay/Task_02_Adafruit_MQTT_Relay.ino",
+                "Task_02_Adafruit_MQTT_Relay/config.h",
+              ]}
+            />
           </div>
 
           <div>
-            <Sub>Problems Encountered &amp; Debugging Log</Sub>
+            <Sub id="t2-explain">Explanation of Important Code Sections</Sub>
+            <ComparisonTable
+              headers={["Code Section", "What It Does & Why"]}
+              rows={[
+                ["config.h", "Keeps WIFI_SSID / WIFI_PASS / AIO_USERNAME / AIO_KEY out of the main sketch so the code can be shared without leaking the key."],
+                ["Adafruit_MQTT_Client mqtt(&client, ...)", "Creates the MQTT client on top of a plain WiFiClient TCP socket to io.adafruit.com:1883, authenticated with username + AIO key."],
+                ["Adafruit_MQTT_Subscribe relayFeed(... \"/feeds/bulb-control\")", "Declares the command topic. mqtt.subscribe(&relayFeed) must run before connecting so the SUBSCRIBE is sent on connect."],
+                ["Adafruit_MQTT_Publish statusFeed(... \"/feeds/device-status\")", "Second topic used to report back (online message and relay state) — proves the round trip works."],
+                ["#define RELAY_ACTIVE LOW / RELAY_INACTIVE HIGH", "The relay module is active-LOW. Naming the levels avoids the inverted-logic bug and makes the ON/OFF branches readable."],
+                ["setup(): digitalWrite(RELAY_PIN, RELAY_INACTIVE)", "Puts the lamp in a safe OFF state before Wi-Fi or MQTT start, so a reboot never switches mains on by accident."],
+                ["MQTT_connect()", "Returns immediately when connected; otherwise retries mqtt.connect() 3 times, 5 s apart, printing connectErrorString() (e.g. bad key)."],
+                ["mqtt.readSubscription(5000)", "Waits up to 5 s for a packet on any subscribed topic — the core receive loop."],
+                ["strcmp(payload, \"ON\") / \"1\"", "Decodes the text payload. Accepting \"1\"/\"0\" too means the same firmware works with switch-style blocks."],
+                ["mqtt.ping()", "Sends PINGREQ after each read window. If it fails the client disconnects and MQTT_connect() reconnects on the next loop."],
+              ]}
+            />
+          </div>
+
+          <div>
+            <Sub id="t2-problems">Problems Encountered During MQTT / Cloud Setup &amp; Solutions Implemented</Sub>
             <TroubleshootCard
               items={[
                 {
                   issue: "Spurious Relay Clicking During Microcontroller Boot",
-                  cause: "Certain ESP32 GPIOs output PWM glitch pulses during bootloader initialization, momentarily triggering the relay.",
-                  solution: "Selected GPIO 4 (a clean general-purpose pin) and called pinMode(4, OUTPUT) and digitalWrite(4, LOW) as the very first statements in setup().",
+                  cause: "Certain ESP32 GPIOs output glitch pulses during bootloader initialization, momentarily triggering the relay.",
+                  solution: "Used GPIO 4 (a clean general-purpose pin) and set it to RELAY_INACTIVE as the very first statement in setup().",
                 },
                 {
-                  issue: "Silent MQTT Disconnections After 60 Seconds of Inactivity",
+                  issue: "Silent MQTT Disconnections After Periods of Inactivity",
                   cause: "NAT firewalls dropped the idle TCP socket because no data packets were flowing between commands.",
-                  solution: "Added an automated mqtt.ping() keepalive heartbeat every 45 seconds and an auto-reconnect retry loop inside loop().",
+                  solution: "Call mqtt.ping() after every 5-second readSubscription() window and reconnect through MQTT_connect() at the start of every loop().",
                 },
                 {
                   issue: "Active-LOW vs Active-HIGH Logic Inversion",
-                  cause: "The relay board was configured for active-LOW optocoupler trigger, meaning 0V energized the coil and 3.3V released it.",
-                  solution: "Inverted the output state in firmware so incoming 'ON' pulled the pin to GND and 'OFF' set it HIGH.",
+                  cause: "The relay board uses an active-LOW optocoupler input: 0V energizes the coil and 3.3V releases it, so the lamp worked backwards at first.",
+                  solution: "Defined RELAY_ACTIVE = LOW and RELAY_INACTIVE = HIGH and used them everywhere, so 'ON' now really turns the lamp on.",
                 },
               ]}
             />
@@ -1666,7 +2181,7 @@ void loop() {
                 },
                 {
                   step: "Adafruit IO Cloud Setup",
-                  detail: "Create feed 'relay-control' on io.adafruit.com, add a Toggle block on your dashboard, and copy your AIO username & key.",
+                  detail: "Create feed 'bulb-control' on io.adafruit.com, add a Toggle block (ON / OFF) on your dashboard, and copy your AIO username & key.",
                 },
                 {
                   step: "Flash & Verify",
@@ -1677,27 +2192,42 @@ void loop() {
           </div>
 
           <div>
-            <Sub>Lab Verification &amp; Evidence</Sub>
+            <Sub id="t2-evidence">Hardware Photographs, Adafruit IO Dashboard Screenshot &amp; Demonstration Video</Sub>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MediaImage
                 src="/media/relay.jpeg"
                 alt="2-channel relay module with red and black wiring"
-                caption="2-channel optocoupler relay module wired to mains incandescent light bulb"
+                caption="Hardware setup: optocoupler relay module wired to the ESP32 and the mains incandescent bulb"
               />
               <MediaImage
                 src="/media/media__1790510641197.png"
                 alt="Adafruit IO bulb-control dashboard showing OFF toggle"
-                caption="Adafruit IO cloud control console with active toggle feed (Sai__0077)"
+                caption="Adafruit IO dashboard Sai__0077 / Bulb Control — Toggle block linked to the bulb-control feed"
               />
               <MediaVideo
                 src="/media/ada_vid.mp4"
-                caption="Video demonstration: Remote MQTT relay toggling from the Adafruit IO cloud dashboard"
+                caption="Cloud control demonstrated: flipping the Adafruit IO toggle on the laptop switches the bulb ON and OFF through MQTT and the relay"
                 wide
               />
             </div>
           </div>
 
-          <Reflection text="Graduating from local HTTP to internet-wide MQTT was the dividing line between an isolated demo and a genuine IoT product. It demonstrated why industrial IoT relies on MQTT rather than polling: the persistent TCP broker connection eliminated port forwarding, allowed instant push updates, and drastically cut battery and CPU consumption." />
+          <div>
+            <Sub id="t2-repo">All Required Files in the Repository</Sub>
+            <RepoFiles
+              folders={["Task_02_Adafruit_MQTT_Relay"]}
+              iotRepoFolder="Task-02-AdafruitIO-MQTT-Relay"
+              files={[
+                { path: "Task_02_Adafruit_MQTT_Relay/Task_02_Adafruit_MQTT_Relay.ino", note: "Complete MQTT subscriber / publisher firmware" },
+                { path: "Task_02_Adafruit_MQTT_Relay/config.h", note: "Wi-Fi + Adafruit IO credentials (placeholders)" },
+              ]}
+            />
+          </div>
+
+          <div id="t2-reflection" className="scroll-mt-44">
+            <Sub>Brief Learning Reflection</Sub>
+            <Reflection text="Graduating from local HTTP to internet-wide MQTT was the dividing line between an isolated demo and a genuine IoT product. It demonstrated why industrial IoT relies on MQTT rather than polling: the persistent TCP broker connection eliminated port forwarding, allowed instant push updates, and drastically cut battery and CPU consumption." />
+          </div>
         </TaskSection>
 
         {/* ══════════════════════════════════════
@@ -1710,8 +2240,32 @@ void loop() {
           title="IFTTT + Adafruit IO Voice Automation & IoT Protocols"
           tag="WEBHOOKS / IFTTT"
         >
+          <TaskChecklist
+            items={[
+              { label: "Objective of the IoT automation", href: "#t3-objective" },
+              { label: "Basic concept of IoT automation", href: "#t3-automation" },
+              { label: "What IFTTT is and why it is used", href: "#t3-ifttt" },
+              { label: "Trigger → Action concept explained", href: "#t3-ifttt" },
+              { label: "Role of Adafruit IO in the automation", href: "#t3-ifttt" },
+              { label: "Hardware and software used", href: "#t3-hardware" },
+              { label: "IFTTT Applet/workflow created and documented", href: "#t3-applet" },
+              { label: "Trigger used identified", href: "#t3-applet" },
+              { label: "Action performed identified", href: "#t3-applet" },
+              { label: "How the trigger reaches the IoT system", href: "#t3-reach" },
+              { label: "Communication/data-flow diagram", href: "#t3-flow" },
+              { label: "ESP32 source code", href: "#t3-code" },
+              { label: "Screenshots of the Adafruit IO dashboard/feed", href: "#t3-evidence" },
+              { label: "Photographs of the working prototype", href: "#t3-evidence" },
+              { label: "Video demonstrating the complete automation", href: "#t3-evidence" },
+              { label: "Automation tested under different conditions", href: "#t3-tests" },
+              { label: "Problems and their solutions documented", href: "#t3-problems" },
+              { label: "What you learned about cloud-based automation", href: "#t3-learned" },
+              { label: "Brief reflection on the assignment", href: "#t3-reflection" },
+            ]}
+          />
+
           <div>
-            <Sub>Objective &amp; Problem Statement</Sub>
+            <Sub id="t3-objective">Objective of the IoT Automation</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
               Eliminate manual dashboard clicking by connecting voice assistants and automated triggers to the hardware.
               Using IFTTT (If This Then That), voice commands spoken into Google Assistant trigger an Applet that
@@ -1727,6 +2281,44 @@ void loop() {
           />
 
           <div>
+            <Sub id="t3-automation">Basic Concept of IoT Automation</Sub>
+            <P>
+              <b>IoT automation</b> means a physical device acts on its own when a condition or event happens, instead of a person
+              operating it step by step. Every automation has the same three parts: an <b>event</b> (a voice command, a time, a
+              sensor value), a <b>rule</b> that decides what should happen, and an <b>actuator</b> that does it (here, the relay and
+              bulb). In Task 2 a human pressed a button on a dashboard; in Task 3 the event comes from another cloud service, and the
+              ESP32 simply reacts to whatever arrives on its feed.
+            </P>
+          </div>
+
+          <div>
+            <Sub id="t3-ifttt">What IFTTT Is · Trigger → Action · Role of Adafruit IO</Sub>
+            <div className="grid md:grid-cols-3 gap-3">
+              <Panel title="What IFTTT is & why it is used" tag="no-code">
+                <p>
+                  <b>IFTTT</b> (“If This Then That”) is a cloud service that links other web services through small programs called
+                  <b> Applets</b>. It already has secure, authorised connections to Google Assistant and Adafruit IO, so I could join a
+                  voice assistant to my hardware without writing or hosting any server code.
+                </p>
+              </Panel>
+              <Panel title="Trigger → Action concept" tag="if this → then that">
+                <p>
+                  An Applet has exactly one <b>trigger</b> (“If This”) — the event IFTTT watches for — and one or more
+                  <b> actions</b> (“Then That”) it runs when the trigger fires. Trigger: <i>I say a phrase to Google Assistant</i>.
+                  Action: <i>send the value ON to my Adafruit IO feed</i>. The ESP32 never talks to IFTTT; it only sees the result.
+                </p>
+              </Panel>
+              <Panel title="Role of Adafruit IO" tag="the bridge">
+                <p>
+                  Adafruit IO is the meeting point: IFTTT <b>writes</b> to the <C>bulb-control</C> feed over HTTPS (REST), and the ESP32
+                  <b> reads</b> the same feed over MQTT. Because the Task 2 dashboard toggle uses the same feed, voice and dashboard
+                  control work side by side and the feed history records every command.
+                </p>
+              </Panel>
+            </div>
+          </div>
+
+          <div>
             <Sub>Core Concepts</Sub>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <ConceptCard term="IFTTT" def="No-code cloud event orchestration platform connecting triggers across disparate consumer web ecosystems." />
@@ -1736,6 +2328,64 @@ void loop() {
               <ConceptCard term="Voice Assistant Integration" def="Speech-to-text NLP engine (Google Assistant) parsing phrases into structured trigger payloads." />
               <ConceptCard term="Zero-Server Middleware" def="Fully serverless chaining: Voice Trigger → IFTTT → Adafruit IO → ESP32 → Relay." />
             </div>
+          </div>
+
+          <div>
+            <Sub id="t3-hardware">Hardware &amp; Software Used</Sub>
+            <HardwareList items={[
+              { icon: "🔌", name: "ESP32 DevKit V1", note: "MQTT subscriber that receives the commands" },
+              { icon: "⚡", name: "5V optocoupled relay (GPIO 4)", note: "Same wiring as Task 2 — switches the lamp" },
+              { icon: "💡", name: "230V bulb + holder", note: "The appliance controlled by voice" },
+              { icon: "📱", name: "Smartphone with Google Assistant", note: "Captures the spoken command" },
+              { icon: "🔁", name: "IFTTT account", note: "Two Applets: lamp ON and lamp OFF" },
+              { icon: "☁️", name: "Adafruit IO", note: "Feed bulb-control (REST in, MQTT out)" },
+              { icon: "📦", name: "Adafruit MQTT Library", note: "Subscribe to the feed on the ESP32" },
+              { icon: "💻", name: "Arduino IDE 2.x", note: "Flash + Serial Monitor (115200) to watch commands arrive" },
+            ]} />
+          </div>
+
+          <div>
+            <Sub id="t3-applet">IFTTT Applet / Workflow Created — Trigger Used &amp; Action Performed</Sub>
+            <ComparisonTable
+              headers={["Applet", "IF THIS — Trigger used", "THEN THAT — Action performed", "Result on hardware"]}
+              rows={[
+                ["Lamp ON", "Google Assistant: voice phrase “Turn on the lamp”", "Adafruit → Send data to Adafruit IO · Feed: bulb-control · Data: ON", "ESP32 gets “ON” → GPIO 4 LOW → relay closes → bulb ON"],
+                ["Lamp OFF", "Google Assistant: voice phrase “Turn off the lamp”", "Adafruit → Send data to Adafruit IO · Feed: bulb-control · Data: OFF", "ESP32 gets “OFF” → GPIO 4 HIGH → relay opens → bulb OFF"],
+              ]}
+            />
+            <div className="grid md:grid-cols-2 gap-4 mt-4">
+              <Panel title="How the Applets were built" tag="ifttt.com → Create">
+                <Steps
+                  items={[
+                    <><b>Create</b> → <b>If This → Add</b> → service <b>Google Assistant</b> → voice-phrase trigger → phrase “Turn on the lamp”.</>,
+                    <><b>Then That → Add</b> → service <b>Adafruit</b> → action <b>Send data to Adafruit IO</b>.</>,
+                    <>Connected my Adafruit IO account (OAuth permission screen), chose feed <C>bulb-control</C>, data to save <C>ON</C>.</>,
+                    <>Named it “Lamp ON”, saved, and repeated with “Turn off the lamp” → <C>OFF</C>.</>,
+                  ]}
+                />
+              </Panel>
+              <Panel title="Equivalent web request (Webhooks variant)" tag="what the action does">
+                <p>The Adafruit action is the same as this REST call, which I also used to test the feed with the Webhooks service:</p>
+                <pre className="font-mono text-[10px] bg-zinc-900 text-emerald-400 p-3 rounded-lg overflow-x-auto">{`POST https://io.adafruit.com/api/v2/Sai__0077/feeds/bulb-control/data
+X-AIO-Key: <AIO_KEY>
+Content-Type: application/json
+
+{ "value": "ON" }`}</pre>
+              </Panel>
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t3-reach">How the Trigger Reaches the IoT System</Sub>
+            <Steps
+              items={[
+                <><b>Phone → Google:</b> the phone streams the audio to Google Assistant&apos;s cloud, which converts speech to text and matches it to my IFTTT phrase.</>,
+                <><b>Google → IFTTT:</b> Google Assistant is linked to my IFTTT account, so the matched phrase fires the Applet&apos;s trigger in IFTTT&apos;s cloud.</>,
+                <><b>IFTTT → Adafruit IO:</b> IFTTT runs the action — an authenticated HTTPS POST to the Adafruit IO REST API that adds the value <C>ON</C> to feed <C>bulb-control</C>.</>,
+                <><b>Adafruit IO → ESP32:</b> the new feed value is published on MQTT topic <C>Sai__0077/feeds/bulb-control</C>; the ESP32 already holds an open subscription on TCP 1883, so the message is pushed to it immediately.</>,
+                <><b>ESP32 → lamp:</b> <C>readSubscription()</C> returns the payload, <C>strcasecmp()</C> matches “ON”, GPIO 4 goes LOW, the relay closes and the bulb lights. No step needed an open port on the lab network.</>,
+              ]}
+            />
           </div>
 
           <div>
@@ -1775,70 +2425,44 @@ void loop() {
           </div>
 
           <div>
-            <Sub>Full End-to-End Workflow</Sub>
-            <div className="flex justify-center my-4">
-              <ArchDiagram steps={[
-                "User: 'Hey Google, Turn ON Desk Lamp'",
-                "Google Assistant parses phrase",
-                "IFTTT Applet fires webhook",
-                "HTTP POST → io.adafruit.com REST API",
-                "Adafruit IO MQTT Broker pushes to topic",
-                "ESP32 receives 'ON' over TCP socket",
-                "GPIO 4 energizes relay → Bulb ON"
-              ]} />
+            <Sub id="t3-flow">Communication / Data-Flow Diagram</Sub>
+            <div className="grid md:grid-cols-2 gap-6 items-center my-4">
+              <div className="flex justify-center">
+                <ArchDiagram steps={[
+                  "User: 'Hey Google, turn on the lamp'",
+                  "Google Assistant (speech → text, phrase match)",
+                  "IFTTT Applet trigger fires",
+                  "HTTPS POST → io.adafruit.com REST API",
+                  "Adafruit IO feed bulb-control = ON",
+                  "MQTT PUBLISH → ESP32 (TCP 1883)",
+                  "GPIO 4 LOW → relay closes → Bulb ON"
+                ]} />
+              </div>
+              <ComparisonTable
+                headers={["Hop", "Protocol / Data"]}
+                rows={[
+                  ["Phone → Google", "Audio stream over HTTPS"],
+                  ["Google → IFTTT", "Service-to-service event (OAuth-linked accounts)"],
+                  ["IFTTT → Adafruit IO", "HTTPS POST, JSON {\"value\":\"ON\"}, X-AIO-Key"],
+                  ["Adafruit IO → ESP32", "MQTT PUBLISH on Sai__0077/feeds/bulb-control"],
+                  ["ESP32 → Relay", "GPIO 4 digital level (active-LOW)"],
+                  ["Relay → Bulb", "230V AC through COM / NO contacts"],
+                ]}
+              />
             </div>
           </div>
 
           <div>
-            <Sub>Firmware Implementation</Sub>
-            <CodeBlock filename="Task_03_IFTTT_Voice_Automation.ino" code={`#include <WiFi.h>
-#include "Adafruit_MQTT.h"
-#include "Adafruit_MQTT_Client.h"
-
-#define WLAN_SSID       "YOUR_WIFI_SSID"
-#define WLAN_PASS       "YOUR_WIFI_PASSWORD"
-#define AIO_SERVER      "io.adafruit.com"
-#define AIO_SERVERPORT  1883
-#define AIO_USERNAME    "Sai__0077"
-#define AIO_KEY         "YOUR_AIO_KEY"
-#define RELAY_PIN       4
-
-WiFiClient client;
-Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
-Adafruit_MQTT_Subscribe voiceFeed = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/bulb-control");
-
-void setup() {
-  Serial.begin(115200);
-  pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, LOW);
-  WiFi.begin(WLAN_SSID, WLAN_PASS);
-  while (WiFi.status() != WL_CONNECTED) delay(500);
-
-  mqtt.subscribe(&voiceFeed);
-  Serial.println("[IFTTT VOICE] Subscribed to feed!");
-}
-
-void loop() {
-  if (!mqtt.connected()) {
-    while (mqtt.connect() != 0) {
-      mqtt.disconnect();
-      delay(5000);
-    }
-  }
-
-  Adafruit_MQTT_Subscribe* sub;
-  while ((sub = mqtt.readSubscription(3000))) {
-    if (sub == &voiceFeed) {
-      char* msg = (char*)voiceFeed.lastread;
-      if (strcmp(msg, "ON") == 0)  digitalWrite(RELAY_PIN, HIGH);
-      if (strcmp(msg, "OFF") == 0) digitalWrite(RELAY_PIN, LOW);
-    }
-  }
-}`} />
+            <Sub id="t3-code">ESP32 Source Code</Sub>
+            <p className="text-xs text-charcoal/70 font-body mb-2">
+              The ESP32 does not know IFTTT exists — it subscribes to the same Adafruit IO feed, logs the arrival time of every
+              command (useful for latency checks) and matches the payload case-insensitively.
+            </p>
+            <SourceFiles files={["Task_03_IFTTT_Voice_Automation/Task_03_IFTTT_Voice_Automation.ino"]} />
           </div>
 
           <div>
-            <Sub>Problems Encountered &amp; Debugging Log</Sub>
+            <Sub id="t3-problems">Problems and Their Solutions</Sub>
             <TroubleshootCard
               items={[
                 {
@@ -1856,6 +2480,22 @@ void loop() {
           </div>
 
           <div>
+            <Sub id="t3-tests">Automation Tested Under Different Conditions</Sub>
+            <ComparisonTable
+              headers={["Condition", "What happens", "Why"]}
+              rows={[
+                ["“Turn on the lamp” spoken", "Bulb turns ON in about a second", "Applet 1 posts ON → feed → MQTT → GPIO 4 LOW"],
+                ["“Turn off the lamp” spoken", "Bulb turns OFF", "Applet 2 posts OFF to the same feed"],
+                ["ON said while the bulb is already ON", "Nothing changes, no flicker", "Writing LOW to an already-LOW pin keeps the relay closed"],
+                ["Voice ON, then dashboard toggle OFF", "Bulb follows the latest command (OFF)", "Both write the same feed — last value wins; the toggle updates too"],
+                ["Payload sent as “on” or “1”", "Bulb turns ON", "strcasecmp() + numeric aliases in the firmware"],
+                ["Wi-Fi / broker connection dropped", "ESP32 reconnects automatically; commands sent while offline are not replayed", "MQTT_connect() retries; the feed is not read back on reconnect (no retained message)"],
+                ["ESP32 rebooted", "Lamp starts OFF, then obeys the next command", "setup() writes RELAY_INACTIVE before connecting — fail-safe"],
+              ]}
+            />
+          </div>
+
+          <div>
             <Sub>Step-by-Step Recreation Manual</Sub>
             <RecreationManualCard
               taskNumber="03"
@@ -1868,7 +2508,7 @@ void loop() {
                 },
                 {
                   step: "Connect Adafruit IO Action",
-                  detail: "Action = Adafruit service 'Send data to Adafruit IO', choose feed 'relay-control', and set payload to 'ON'.",
+                  detail: "Action = Adafruit service 'Send data to Adafruit IO', choose feed 'bulb-control', and set payload to 'ON'.",
                 },
                 {
                   step: "Complementary OFF Applet",
@@ -1883,17 +2523,60 @@ void loop() {
           </div>
 
           <div>
-            <Sub>Lab Verification &amp; Evidence</Sub>
-            <div className="grid grid-cols-1 gap-4">
+            <Sub id="t3-evidence">Working Prototype, Adafruit IO Feed &amp; Automation Video</Sub>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MediaVideo
                 src="/media/voice.mp4"
-                caption="Voice automation in action: Google Assistant voice command triggering bulb actuation via IFTTT and MQTT"
+                caption="Complete automation: Google Assistant voice command → IFTTT → Adafruit IO → ESP32 → relay switches the bulb"
                 wide
+              />
+              <MediaImage
+                src="/media/media__1790510641197.png"
+                alt="Adafruit IO Bulb Control dashboard with toggle linked to the bulb-control feed"
+                caption="Adafruit IO dashboard / bulb-control feed that the IFTTT action writes to (the toggle mirrors voice commands)"
+              />
+              <MediaImage
+                src="/media/relay.jpeg"
+                alt="Relay module wired to the ESP32 and mains bulb"
+                caption="Working prototype: ESP32 + optocoupled relay + bulb (same rig as Task 2)"
               />
             </div>
           </div>
 
-          <Reflection text="The IFTTT exercise revealed how powerful micro-service composition is. By pairing a voice NLP frontend with a webhook router and an MQTT broker, we constructed an enterprise-grade smart-home feature without maintaining a single server instance or writing a single line of backend middleware." />
+          <div>
+            <Sub id="t3-learned">What I Learned About Cloud-Based Automation</Sub>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                { t: "The device stays simple", d: "All the intelligence (speech recognition, rules) lives in the cloud. The ESP32 code is almost the same as Task 2 — it only listens to a feed." },
+                { t: "Services connect through shared data", d: "IFTTT and the ESP32 never meet; they agree on one feed name and one payload format. Changing either side does not break the other." },
+                { t: "Every hop adds latency and a dependency", d: "Voice → Google → IFTTT → Adafruit IO → ESP32 is four companies' servers. If any one is down or slow, the lamp does not respond — local control is still worth keeping." },
+                { t: "Security is about keys and scopes", d: "IFTTT holds an OAuth grant to my Adafruit IO account and the ESP32 holds the AIO key. Leaking either lets someone control the device, so keys stay out of the repository." },
+                { t: "Free tiers shape the design", d: "Adafruit IO allows 30 data points per minute, so the device must publish only on changes, never in a tight loop." },
+                { t: "Event-driven beats polling", d: "Nothing runs until an event arrives — the ESP32 just waits on an open MQTT socket instead of asking a server every second." },
+              ].map((x, i) => (
+                <div key={i} className="p-4 rounded-xl border border-charcoal/15 bg-white shadow-sm">
+                  <div className="font-mono text-xs font-bold text-charcoal mb-1">{x.t}</div>
+                  <p className="text-xs text-charcoal/70 leading-relaxed font-body">{x.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t3-repo">Files in the Repository</Sub>
+            <RepoFiles
+              folders={["Task_03_IFTTT_Voice_Automation"]}
+              iotRepoFolder="Task-03-IFTTT-Voice-Automation"
+              files={[
+                { path: "Task_03_IFTTT_Voice_Automation/Task_03_IFTTT_Voice_Automation.ino", note: "ESP32 subscriber for IFTTT-driven commands" },
+              ]}
+            />
+          </div>
+
+          <div id="t3-reflection" className="scroll-mt-44">
+            <Sub>Brief Reflection on the Assignment</Sub>
+            <Reflection text="The IFTTT exercise revealed how powerful micro-service composition is. By pairing a voice NLP frontend with a webhook router and an MQTT broker, we constructed an enterprise-grade smart-home feature without maintaining a single server instance or writing a single line of backend middleware." />
+          </div>
         </TaskSection>
 
         {/* ══════════════════════════════════════
@@ -1906,8 +2589,33 @@ void loop() {
           title="Firebase IoT Monitoring Dashboard &amp; Sensor Suite"
           tag="FIREBASE / SENSORS"
         >
+          <TaskChecklist
+            items={[
+              { label: "Objective of the Firebase IoT monitoring system", href: "#t4-objective" },
+              { label: "Basic concept of Cloud Computing", href: "#t4-cloud" },
+              { label: "IaaS, PaaS, SaaS, and BaaS explained", href: "#t4-models" },
+              { label: "What a Cloud Platform is", href: "#t4-platform" },
+              { label: "What a Database is", href: "#t4-platform" },
+              { label: "Firebase Realtime Database explained", href: "#t4-rtdb" },
+              { label: "What a Cloud-Based Dashboard is", href: "#t4-rtdb" },
+              { label: "Authentication and the purpose of a login system", href: "#t4-auth" },
+              { label: "Difference between Authentication and Authorization", href: "#t4-auth" },
+              { label: "Firebase project setup documented", href: "#t4-setup" },
+              { label: "Firebase Authentication configuration documented", href: "#t4-setup" },
+              { label: "Realtime Database structure documented", href: "#t4-schema" },
+              { label: "Database/data-flow architecture", href: "#t4-dataflow" },
+              { label: "Complete dashboard source code", href: "#t4-dashcode" },
+              { label: "Screenshots of the login page", href: "#t4-evidence" },
+              { label: "Screenshots of the Firebase database", href: "#t4-evidence" },
+              { label: "Screenshots of the working dashboard", href: "#t4-evidence" },
+              { label: "Video demonstrating webpage workflow", href: "#t4-evidence" },
+              { label: "Problems encountered and their solutions", href: "#t4-problems" },
+              { label: "Brief reflection on the assignment", href: "#t4-reflection" },
+            ]}
+          />
+
           <div>
-            <Sub>Objective &amp; Problem Statement</Sub>
+            <Sub id="t4-objective">Objective of the Firebase IoT Monitoring System</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
               Scale up to a multi-sensor telemetry suite backed by Google Firebase Realtime Database. The ESP32 continuously
               samples temperature and relative humidity from a DHT11 digital sensor, ambient illuminance from an analog LDR
@@ -1921,6 +2629,171 @@ void loop() {
             quote="DHT11 specification: accuracy ±2°C. In reality: ±'definitely feels warm in this room.' Analog LDR ADC reading: 0 at midnight, 4095 when you point a flashlight directly into its soul."
             lesson="Always calibrate analog sensor readings into meaningful engineering units and handle floating-point NaN guard rails in firmware."
           />
+
+          <div>
+            <Sub id="t4-cloud">Basic Concept of Cloud Computing</Sub>
+            <P>
+              <b>Cloud computing</b> is renting computing resources — servers, storage, databases, networking and ready-made
+              software — over the internet from a provider such as Google, instead of buying and running the machines yourself.
+              You pay for (or get a free quota of) what you use, it scales up when more devices connect, and the provider handles
+              hardware failures, backups and security patches. For this task it meant my ESP32 and my browser could share live data
+              through Google&apos;s servers in Singapore without me owning or configuring a single server.
+            </P>
+          </div>
+
+          <div>
+            <Sub id="t4-models">IaaS, PaaS, SaaS and BaaS Explained</Sub>
+            <ComparisonTable
+              headers={["Model", "What you get", "Provider manages", "You manage", "Examples", "Where it appears in Week 7"]}
+              rows={[
+                ["IaaS — Infrastructure as a Service", "Raw virtual machines, disks and networks", "Physical servers, storage, networking, virtualization", "OS, runtime, database, backend code, app", "AWS EC2, Google Compute Engine, Azure VMs", "Not used — I would have had to install and secure my own MQTT broker / database on a VM"],
+                ["PaaS — Platform as a Service", "A managed place to run your own code", "Everything up to the runtime (OS, scaling, patching)", "Your application code and its data", "Google App Engine, Heroku, Vercel", "This portfolio (including this page) is built and hosted on Vercel"],
+                ["SaaS — Software as a Service", "A finished application used through a browser/app", "The whole application", "Only your settings and data", "Gmail, Google Assistant, IFTTT, Adafruit IO dashboards", "Tasks 2–3: Adafruit IO dashboard, IFTTT applets, Google Assistant"],
+                ["BaaS — Backend as a Service", "Ready-made backend building blocks called from the app", "Servers, database engine, auth system, hosting, scaling", "Front-end code, data structure, security rules", "Firebase, Supabase, AWS Amplify", "Tasks 4–5: Firebase Authentication + Realtime Database + Hosting"],
+              ]}
+            />
+            <div className="overflow-x-auto rounded-2xl border border-charcoal/15 bg-white shadow-sm my-3">
+              <table className="w-full text-center text-[11px] font-mono">
+                <thead className="bg-zinc-100/80 text-[10px] text-charcoal/70 uppercase tracking-wider border-b border-charcoal/10">
+                  <tr>
+                    <th className="py-2 px-3 text-left">Layer</th>
+                    <th className="py-2 px-3">On-premise</th>
+                    <th className="py-2 px-3">IaaS</th>
+                    <th className="py-2 px-3">PaaS</th>
+                    <th className="py-2 px-3">BaaS</th>
+                    <th className="py-2 px-3">SaaS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-charcoal/10">
+                  {[
+                    ["Application / UI", 1, 1, 1, 1, 0],
+                    ["Backend logic & APIs", 1, 1, 1, 0, 0],
+                    ["Database & Auth", 1, 1, 1, 0, 0],
+                    ["Runtime & OS", 1, 1, 0, 0, 0],
+                    ["Servers, storage, network", 1, 0, 0, 0, 0],
+                  ].map((row, i) => (
+                    <tr key={i}>
+                      <td className="py-2 px-3 text-left font-bold text-charcoal">{row[0]}</td>
+                      {row.slice(1).map((you, j) => (
+                        <td key={j} className="py-1.5 px-2">
+                          <span className={`inline-block w-full rounded px-2 py-0.5 ${you ? "bg-amber-100 text-amber-900" : "bg-sky-100 text-sky-900"}`}>
+                            {you ? "You" : "Provider"}
+                          </span>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-charcoal/70 font-body">
+              <b>Why BaaS fit this project:</b> with Firebase I wrote only the ESP32 firmware, the HTML/JS dashboard and the security
+              rules. User accounts, password hashing, the database server, WebSocket sync and HTTPS hosting were all provided.
+            </p>
+          </div>
+
+          <div>
+            <Sub id="t4-platform">What a Cloud Platform Is &amp; What a Database Is</Sub>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Panel title="Cloud platform" tag="e.g. Firebase / Google Cloud">
+                <p>
+                  A <b>cloud platform</b> is a provider&apos;s collection of cloud services that work together under one account,
+                  console and billing — compute, storage, databases, authentication, hosting, analytics. <b>Firebase</b> is Google&apos;s
+                  app-development platform: in one project (<C>smarthome-iot-e9fe6</C>) I used three of its services — Authentication,
+                  Realtime Database and Hosting — and managed them from one web console and the <C>firebase</C> CLI.
+                </p>
+              </Panel>
+              <Panel title="Database" tag="organised, persistent data">
+                <p>
+                  A <b>database</b> is an organised store of data that programs can read, write, search and update reliably, and that
+                  keeps the data after the program stops. <b>Relational (SQL)</b> databases keep data in tables with fixed columns
+                  (MySQL, PostgreSQL). <b>NoSQL</b> databases use flexible formats such as documents or JSON trees (Firebase RTDB,
+                  MongoDB). Sensor readings and device state change shape often and are read as one small object, so a NoSQL JSON
+                  tree is a natural fit here.
+                </p>
+              </Panel>
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t4-rtdb">Firebase Realtime Database Explained &amp; What a Cloud-Based Dashboard Is</Sub>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Panel title="Firebase Realtime Database (RTDB)" tag="NoSQL · JSON tree · live sync">
+                <p>
+                  The RTDB stores everything as <b>one big JSON tree</b>; each piece of data has a path such as
+                  <C>/current/temperature</C>. Clients do not poll — they attach a <b>listener</b> (<C>onValue()</C> in JS) and the
+                  database pushes every change to all connected clients over a persistent WebSocket, usually within a few hundred
+                  milliseconds. Writes use <C>set()</C> / <C>update()</C>; the ESP32 uses the same paths through the REST/stream API of the
+                  Firebase ESP Client library. Access is controlled per path by <b>Security Rules</b>. My instance is
+                  <C>smarthome-iot-e9fe6-default-rtdb</C> in <b>asia-southeast1 (Singapore)</b> on the free Spark plan.
+                </p>
+              </Panel>
+              <Panel title="Cloud-based dashboard" tag="smarthome-iot-e9fe6.web.app">
+                <p>
+                  A <b>cloud-based dashboard</b> is a web page, hosted on the internet, that shows live data from devices and lets a user
+                  send commands back — from any browser, anywhere, without installing anything. Mine is static HTML/CSS/JS on
+                  <b> Firebase Hosting</b>: it signs the user in, listens to <C>/current</C> to show temperature, humidity and light,
+                  and writes <C>mode</C>, <C>relay</C> and <C>threshold</C> when the user changes a control. The ESP32 reacts to those
+                  writes, so the dashboard is both a monitor and a remote control.
+                </p>
+              </Panel>
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t4-auth">Authentication, the Purpose of a Login System &amp; Authentication vs Authorization</Sub>
+            <P>
+              <b>Authentication</b> answers “<i>who are you?</i>” — the user proves their identity, here with an email and password
+              checked by Firebase Authentication. The <b>purpose of the login system</b> is to make sure only known people (and my
+              ESP32, which has its own device account <C>esp32@firebase.local</C>) can reach a dashboard that switches a 230V lamp,
+              and to give every request an identity (a signed ID token with a user ID) that the database can check.
+            </P>
+            <ComparisonTable
+              headers={["", "Authentication (AuthN)", "Authorization (AuthZ)"]}
+              rows={[
+                ["Question answered", "Who are you?", "What are you allowed to do?"],
+                ["When it happens", "First — at login", "After login — on every read / write"],
+                ["How (in this project)", "Firebase Auth: signInWithEmailAndPassword() on the login page; device account for the ESP32", "Realtime Database Security Rules evaluated per path (e.g. \"auth != null\")"],
+                ["Result", "An ID token containing the user's UID", "Request allowed or \"Permission denied\""],
+                ["Analogy", "Showing your ID card at the lab entrance", "Which rooms your ID card can open"],
+              ]}
+            />
+            <p className="text-xs text-charcoal/70 font-body mt-3 mb-2">
+              Authorization rules for this project — only signed-in users (the admin account or the ESP32 device account) may read
+              or write the live node and the logs:
+            </p>
+            <SourceFiles files={["Task_04_Firebase_Dashboard/database.rules.json"]} />
+          </div>
+
+          <div>
+            <Sub id="t4-setup">Firebase Project Setup &amp; Authentication Configuration</Sub>
+            <div className="grid md:grid-cols-2 gap-6 items-start">
+              <Steps
+                items={[
+                  <><b>Create project:</b> Firebase console → Add project → <i>SmartHome-IoT</i> (ID <C>smarthome-iot-e9fe6</C>), free Spark plan.</>,
+                  <><b>Register a web app</b> (&lt;/&gt; icon) → copy the <C>firebaseConfig</C> object into <C>js/firebase.js</C>.</>,
+                  <><b>Authentication → Sign-in method:</b> enable <b>Email/Password</b>.</>,
+                  <><b>Authentication → Users → Add user:</b> my admin login for the dashboard, plus a device account <C>esp32@firebase.local</C> used by the firmware.</>,
+                  <><b>Realtime Database → Create database:</b> location <b>Singapore (asia-southeast1)</b>, started in test mode, then created the <C>/current</C> node with the keys shown below.</>,
+                  <><b>Firebase CLI:</b> <C>npm i -g firebase-tools</C> → <C>firebase login</C> → <C>firebase init</C> (Hosting + Database) → <C>firebase deploy</C> → live at <C>smarthome-iot-e9fe6.web.app</C>.</>,
+                  <><b>ESP32:</b> installed <i>Firebase ESP Client</i> (Mobizt) + <i>DHT sensor library</i>, set <C>API_KEY</C>, <C>DATABASE_URL</C> and the device account in the sketch, flashed.</>,
+                ]}
+              />
+              <ComparisonTable
+                headers={["Item", "Configuration"]}
+                rows={[
+                  ["Project", "SmartHome-IoT · smarthome-iot-e9fe6 · Spark (free)"],
+                  ["Auth provider", "Email / Password"],
+                  ["Auth users", "Admin (dashboard login) · esp32@firebase.local (device)"],
+                  ["Login code", "js/auth.js → signInWithEmailAndPassword() → dashboard.html"],
+                  ["Database", "Realtime Database, asia-southeast1 (Singapore)"],
+                  ["Database URL", "smarthome-iot-e9fe6-default-rtdb.asia-southeast1.firebasedatabase.app"],
+                  ["Hosting", "smarthome-iot-e9fe6.web.app (index.html = login)"],
+                  ["SDK", "Firebase JS SDK 10.13.2 (ES modules from gstatic CDN)"],
+                ]}
+              />
+            </div>
+          </div>
 
           <div>
             <Sub>Core Concepts</Sub>
@@ -1952,9 +2825,9 @@ void loop() {
             <Sub>ESP32 Pin Connections &amp; Sensor Wiring</Sub>
             <PinTable
               rows={[
-                { pin: "GPIO 4", component: "DHT11 Digital Data Line", type: "Single-Wire Serial (3.3V)", notes: "Digital time-pulsed data output; requires 10k pull-up resistor to 3.3V." },
+                { pin: "GPIO 14", component: "DHT11 Digital Data Line", type: "Single-Wire Serial (3.3V)", notes: "Digital time-pulsed data output; requires 10k pull-up resistor to 3.3V." },
                 { pin: "GPIO 34", component: "LDR Photoresistor Divider", type: "Analog Input (12-bit ADC1)", notes: "Connected to junction between LDR and 10k resistor. ADC range: 0–4095." },
-                { pin: "GPIO 26", component: "Relay Module IN Pin", type: "Digital Output (3.3V Logic)", notes: "Energizes relay channel driving the physical test lamp." },
+                { pin: "GPIO 4", component: "Relay Module IN Pin", type: "Digital Output (Active-LOW)", notes: "Energizes relay channel driving the physical test lamp." },
                 { pin: "3.3V Rail", component: "Sensor VCC Bus", type: "Regulated 3.3V Power", notes: "Supplies reference voltage to DHT11 and LDR voltage divider." },
                 { pin: "GND Rail", component: "Common Ground Bus", type: "0V Reference", notes: "Ties ESP32, sensors, and relay logic ground together." },
               ]}
@@ -1999,18 +2872,41 @@ void loop() {
           </div>
 
           <div>
-            <Sub>Database Schema &amp; Node Hierarchy</Sub>
+            <Sub id="t4-schema">Realtime Database Structure (Node Hierarchy)</Sub>
             <div className="p-5 rounded-2xl border border-charcoal/15 bg-zinc-50 font-mono text-xs text-charcoal/85 space-y-2">
-              <div className="text-[10px] text-charcoal/60 uppercase tracking-widest font-bold mb-2">/current JSON Tree</div>
+              <div className="text-[10px] text-charcoal/60 uppercase tracking-widest font-bold mb-2">smarthome-iot-e9fe6-default-rtdb / current</div>
               <div className="grid sm:grid-cols-2 gap-2">
-                <div><span className="text-indigo-600 font-bold">&quot;temperature&quot;</span>: 28.4 <span className="text-graymid">(float, °C)</span></div>
-                <div><span className="text-indigo-600 font-bold">&quot;humidity&quot;</span>: 62.0 <span className="text-graymid">(float, %)</span></div>
-                <div><span className="text-indigo-600 font-bold">&quot;ldr&quot;</span>: 1820 <span className="text-graymid">(int, 12-bit ADC)</span></div>
-                <div><span className="text-indigo-600 font-bold">&quot;bulbState&quot;</span>: true <span className="text-graymid">(boolean, relay output)</span></div>
-                <div><span className="text-indigo-600 font-bold">&quot;mode&quot;</span>: &quot;AUTO&quot; <span className="text-graymid">(string, control mode)</span></div>
-                <div><span className="text-indigo-600 font-bold">&quot;threshold&quot;</span>: 1500 <span className="text-graymid">(int, daylight trigger level)</span></div>
+                <div><span className="text-indigo-600 font-bold">&quot;temperature&quot;</span>: 23 <span className="text-graymid">(number, °C — written by ESP32)</span></div>
+                <div><span className="text-indigo-600 font-bold">&quot;humidity&quot;</span>: 55 <span className="text-graymid">(number, % — written by ESP32)</span></div>
+                <div><span className="text-indigo-600 font-bold">&quot;ldr&quot;</span>: 1851 <span className="text-graymid">(int 0–4095 — written by ESP32)</span></div>
+                <div><span className="text-indigo-600 font-bold">&quot;bulbState&quot;</span>: false <span className="text-graymid">(boolean, actual relay output — ESP32)</span></div>
+                <div><span className="text-indigo-600 font-bold">&quot;relay&quot;</span>: &quot;OFF&quot; <span className="text-graymid">(&quot;ON&quot;/&quot;OFF&quot; — dashboard toggle)</span></div>
+                <div><span className="text-indigo-600 font-bold">&quot;mode&quot;</span>: &quot;AUTO&quot; <span className="text-graymid">(&quot;AUTO&quot;/&quot;MANUAL&quot; — dashboard select)</span></div>
+                <div><span className="text-indigo-600 font-bold">&quot;threshold&quot;</span>: 1500 <span className="text-graymid">(int 0–4095 — dashboard slider)</span></div>
               </div>
+              <p className="text-[11px] font-body text-charcoal/70 pt-2">
+                A single flat node keeps every read to one small object: the dashboard attaches one listener to <C>/current</C> and
+                the ESP32 updates only the keys it owns with <C>updateNode()</C>, so it never overwrites the user&apos;s mode or threshold.
+              </p>
             </div>
+          </div>
+
+          <div>
+            <Sub id="t4-dataflow">Database / Data-Flow Architecture</Sub>
+            <DataFlowLanes
+              lanes={[
+                { title: "ESP32 (device)", sub: "Firebase ESP Client · signed in as esp32@firebase.local", items: ["reads DHT11 + LDR every 5 s", "reads mode / relay / threshold every 1 s", "drives relay on GPIO 4"] },
+                { title: "Firebase RTDB (cloud)", sub: "asia-southeast1 · JSON tree", items: ["/current/temperature, humidity, ldr", "/current/bulbState", "/current/mode, relay, threshold", "Security Rules check every request"] },
+                { title: "Web dashboard (client)", sub: "Firebase Hosting · JS SDK v10", items: ["index.html → Firebase Auth login", "dashboard.html → onValue(/current)", "set() on toggle / select / slider"] },
+              ]}
+              flows={[
+                { from: "ESP32", to: "RTDB", label: "updateNode(/current, {temperature, humidity, ldr, bulbState}) every 5 s" },
+                { from: "RTDB", to: "Dashboard", label: "onValue(/current) pushes the change over a WebSocket → cards update" },
+                { from: "Dashboard", to: "RTDB", label: "set(current/relay | mode | threshold) when the user changes a control" },
+                { from: "RTDB", to: "ESP32", label: "getString / getInt on those keys → relay switched (MANUAL) or threshold applied (AUTO)" },
+                { from: "ESP32", to: "RTDB", label: "setBool(current/bulbState) (+ current/relay in AUTO) so the dashboard shows the real state" },
+              ]}
+            />
           </div>
 
           <div>
@@ -2024,57 +2920,31 @@ void loop() {
           </div>
 
           <div>
-            <Sub>Firmware Telemetry Loop</Sub>
-            <CodeBlock filename="Task_04_Firebase_Sensors_Telemetry.ino" code={`#include <WiFi.h>
-#include <Firebase_ESP_Client.h>
-#include <DHT.h>
-
-#define DHTPIN   4
-#define DHTTYPE  DHT11
-#define LDRPIN   34
-#define RELAYPIN 26
-
-FirebaseData  fbdo;
-FirebaseAuth  auth;
-FirebaseConfig config;
-DHT dht(DHTPIN, DHTTYPE);
-
-void setup() {
-  Serial.begin(115200);
-  WiFi.begin("YOUR_WIFI_SSID", "YOUR_WIFI_PASSWORD");
-  while (WiFi.status() != WL_CONNECTED) delay(500);
-
-  config.host = "YOUR_FIREBASE_PROJECT.firebaseio.com";
-  config.signer.tokens.legacy_token = "YOUR_DATABASE_SECRET";
-  Firebase.begin(&config, &auth);
-  dht.begin();
-  pinMode(RELAYPIN, OUTPUT);
-}
-
-void loop() {
-  float t = dht.readTemperature();
-  float h = dht.readHumidity();
-  int   l = analogRead(LDRPIN);
-
-  // Guard against sensor communication glitches
-  if (!isnan(t) && !isnan(h)) {
-    Firebase.RTDB.setFloat(&fbdo, "/current/temperature", t);
-    Firebase.RTDB.setFloat(&fbdo, "/current/humidity",    h);
-    Firebase.RTDB.setInt  (&fbdo, "/current/ldr",         l);
-  }
-
-  // Poll for dashboard relay commands
-  if (Firebase.RTDB.getBool(&fbdo, "/current/bulbState")) {
-    bool state = fbdo.to<bool>();
-    digitalWrite(RELAYPIN, state ? HIGH : LOW);
-  }
-
-  delay(5000); // 5-second sampling cycle
-}`} />
+            <Sub id="t4-dashcode">Complete Dashboard Source Code</Sub>
+            <p className="text-xs text-charcoal/70 font-body mb-2">
+              The deployed dashboard is plain HTML + CSS + JavaScript ES modules (no framework): <C>index.html</C> is the login page,
+              <C>js/auth.js</C> signs in with Firebase Auth, <C>dashboard.html</C> + <C>js/dashboard.js</C> listen to <C>/current</C> and write
+              the controls, and <C>js/firebase.js</C> initialises the SDK (web API key shown as a placeholder).
+            </p>
+            <SourceFiles
+              files={[
+                "Task_04_Firebase_Dashboard/index.html",
+                "Task_04_Firebase_Dashboard/js/auth.js",
+                "Task_04_Firebase_Dashboard/dashboard.html",
+                "Task_04_Firebase_Dashboard/js/dashboard.js",
+                "Task_04_Firebase_Dashboard/js/firebase.js",
+                "Task_04_Firebase_Dashboard/css/style.css",
+              ]}
+            />
           </div>
 
           <div>
-            <Sub>Problems Encountered &amp; Debugging Log</Sub>
+            <Sub id="t4-firmware">ESP32 Firmware (Telemetry &amp; Control Node)</Sub>
+            <SourceFiles files={["Task_04_Firebase_Sensors_Telemetry/Task_04_Firebase_Sensors_Telemetry.ino"]} />
+          </div>
+
+          <div>
+            <Sub id="t4-problems">Problems Encountered &amp; Their Solutions</Sub>
             <TroubleshootCard
               items={[
                 {
@@ -2091,6 +2961,11 @@ void loop() {
                   issue: "Firebase Token Expiration Causing Memory Leaks",
                   cause: "Instantiating new FirebaseData objects inside the loop leaked heap RAM over time until the microcontroller experienced a kernel panic.",
                   solution: "Reused a static global fbdo singleton and enabled Firebase.reconnectWiFi(true) in setup().",
+                },
+                {
+                  issue: "Dashboard Cards Showing “--” Instead of Values",
+                  cause: "The key names written by the firmware and read by the dashboard did not match in letter case (e.g. Temperature vs temperature), and RTDB keys are case-sensitive.",
+                  solution: "Standardised on lowercase keys and made dashboard.js accept both spellings while testing (d.temperature ?? d.Temperature).",
                 },
               ]}
             />
@@ -2124,8 +2999,23 @@ void loop() {
           </div>
 
           <div>
-            <Sub>Lab Verification &amp; Evidence</Sub>
+            <Sub id="t4-evidence">Screenshots: Login Page · Firebase Database · Working Dashboard · Workflow Video</Sub>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <MediaImage
+                src="/media/task4_login_page.png"
+                alt="Smart Home System Login page with Admin Email, Password and Authenticate button"
+                caption="Login page (index.html) on smarthome-iot-e9fe6.web.app — Firebase Email/Password authentication gate before the dashboard"
+              />
+              <MediaImage
+                src="/media/media__1790510820927.png"
+                alt="Working dashboard at smarthome-iot-e9fe6.web.app/dashboard.html"
+                caption="Working dashboard (dashboard.html): live temperature, humidity, ambient light, system mode, main relay and LDR threshold"
+              />
+              <MediaVideo
+                src="/media/dash_vid.mp4"
+                caption="Webpage workflow: operating the dashboard controls on the laptop and the bulb responding through Firebase and the ESP32"
+                wide
+              />
               <MediaImage
                 src="/media/firebase_cli_init.jpg"
                 alt="Firebase CLI Terminal initialization and deployment"
@@ -2155,7 +3045,28 @@ void loop() {
             </div>
           </div>
 
-          <Reflection text="Transitioning to Google Firebase was an eye-opener in modern full-stack IoT. Instead of point-to-point messaging, the database became the single source of truth for both physical sensors and browser user interfaces. The real-time synchronization handled network drops gracefully and proved how essential authorization layers are for connected hardware." />
+          <div>
+            <Sub id="t4-repo">Files in the Repository</Sub>
+            <RepoFiles
+              folders={["Task_04_Firebase_Sensors_Telemetry", "Task_04_Firebase_Dashboard"]}
+              iotRepoFolder="Task-04-Firebase-Sensors-Telemetry"
+              files={[
+                { path: "Task_04_Firebase_Sensors_Telemetry/Task_04_Firebase_Sensors_Telemetry.ino", note: "ESP32 telemetry + control firmware" },
+                { path: "Task_04_Firebase_Dashboard/index.html", note: "Login page" },
+                { path: "Task_04_Firebase_Dashboard/dashboard.html", note: "Dashboard page" },
+                { path: "Task_04_Firebase_Dashboard/js/auth.js", note: "Firebase Auth sign-in" },
+                { path: "Task_04_Firebase_Dashboard/js/dashboard.js", note: "RTDB listener + controls" },
+                { path: "Task_04_Firebase_Dashboard/js/firebase.js", note: "SDK initialisation" },
+                { path: "Task_04_Firebase_Dashboard/css/style.css", note: "Dashboard styling" },
+                { path: "Task_04_Firebase_Dashboard/database.rules.json", note: "Authorization rules" },
+              ]}
+            />
+          </div>
+
+          <div id="t4-reflection" className="scroll-mt-44">
+            <Sub>Brief Reflection on the Assignment</Sub>
+            <Reflection text="Transitioning to Google Firebase was an eye-opener in modern full-stack IoT. Instead of point-to-point messaging, the database became the single source of truth for both physical sensors and browser user interfaces. The real-time synchronization handled network drops gracefully and proved how essential authorization layers are for connected hardware." />
+          </div>
         </TaskSection>
 
         {/* ══════════════════════════════════════
@@ -2168,8 +3079,40 @@ void loop() {
           title="Firebase Logging, Automation &amp; Data Export"
           tag="ANALYTICS / CSV"
         >
+          <TaskChecklist
+            items={[
+              { label: "Objective of the complete IoT system", href: "#t5-objective" },
+              { label: "Final system architecture documented", href: "#t5-architecture" },
+              { label: "DHT11 Temperature and Humidity Monitoring demonstrated", href: "#t5-evidence" },
+              { label: "LDR-based Light Level Monitoring demonstrated", href: "#t5-evidence" },
+              { label: "Manual Bulb Control implemented", href: "#t5-manual" },
+              { label: "Automatic Bulb Control using LDR implemented", href: "#t5-modes" },
+              { label: "Manual / Automatic Mode implemented and documented", href: "#t5-modes" },
+              { label: "Logic used for automatic lighting explained", href: "#t5-modes" },
+              { label: "LDR threshold/calibration method documented", href: "#t5-calibration" },
+              { label: "Historical data logging in Firebase implemented", href: "#t5-logs" },
+              { label: "Database structure used for logs documented", href: "#t5-logs" },
+              { label: "Timestamped sensor readings recorded", href: "#t5-logs" },
+              { label: "Temperature and humidity values recorded", href: "#t5-csv" },
+              { label: "LDR/light-level values recorded", href: "#t5-csv" },
+              { label: "Bulb status and operating mode recorded", href: "#t5-csv" },
+              { label: "Historical data displayed on the dashboard", href: "#t5-history" },
+              { label: "Graph/chart for recorded sensor data included", href: "#t5-history" },
+              { label: "CSV data download implemented", href: "#t5-export" },
+              { label: "Downloaded file demonstrated to contain the recorded data", href: "#t5-csv" },
+              { label: "Screenshots of the dashboard and data visualization", href: "#t5-evidence" },
+              { label: "Photographs of the complete prototype", href: "#t5-evidence" },
+              { label: "Video demonstrating the complete system", href: "#t5-evidence" },
+              { label: "Problems encountered and solutions implemented", href: "#t5-problems" },
+              { label: "Limitations of the current prototype explained", href: "#t5-limits" },
+              { label: "Possible future improvements suggested", href: "#t5-future" },
+              { label: "Final learning reflection included", href: "#t5-reflection" },
+              { label: "All source code and project files available in the repository", href: "#t5-repo" },
+            ]}
+          />
+
           <div>
-            <Sub>Objective &amp; Problem Statement</Sub>
+            <Sub id="t5-objective">Objective of the Complete IoT System</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
               The capstone task brought the complete embedded system into a production-grade analytics platform.
               In addition to real-time telemetry, the ESP32 appends timestamped historical log records into Firebase.
@@ -2186,7 +3129,58 @@ void loop() {
           />
 
           <div>
-            <Sub>Operating Modes &amp; Autonomy</Sub>
+            <Sub id="t5-architecture">Final System Architecture</Sub>
+            <DataFlowLanes
+              lanes={[
+                { title: "Sensing & actuation (ESP32)", sub: "DHT11 · LDR · relay + 230V bulb", items: ["DHT11 → temperature, humidity (GPIO 14)", "LDR divider → light level 0–4095 (GPIO 34)", "Relay → bulb (GPIO 4, active-LOW)", "NTP clock → UTC timestamps"] },
+                { title: "Cloud (Firebase)", sub: "Auth + Realtime Database + Hosting", items: ["/current — live values & controls", "/telemetry/logs/{epoch} — history", "Email/Password accounts (user + device)", "Security Rules (auth != null)"] },
+                { title: "Users (browser)", sub: "Login → dashboard → history → CSV", items: ["Live cards + mode / relay / threshold", "History table + trend chart", "Download CSV (in browser)", "Python exporter for offline analysis"] },
+              ]}
+              flows={[
+                { from: "ESP32", to: "/current", label: "live temperature, humidity, ldr, bulbState every 5 s" },
+                { from: "ESP32", to: "/telemetry/logs", label: "one timestamped record every 5 s (temp, hum, ldr, relay, mode)" },
+                { from: "Dashboard", to: "/current", label: "mode (AUTO/MANUAL), relay (ON/OFF), threshold" },
+                { from: "/current", to: "ESP32", label: "commands read every 1 s → relay decision" },
+                { from: "/telemetry/logs", to: "Dashboard", label: "history view, chart and CSV export" },
+              ]}
+            />
+          </div>
+
+          <div>
+            <Sub id="t5-manual">Manual Bulb Control Implementation</Sub>
+            <div className="grid md:grid-cols-2 gap-4 items-start">
+              <P>
+                In <b>MANUAL</b> mode the user switches the bulb from the dashboard&apos;s <b>Main Relay</b> toggle. The toggle writes
+                <C>&quot;ON&quot;</C> or <C>&quot;OFF&quot;</C> to <C>/current/relay</C>; the ESP32 reads that key every second and sets GPIO 4
+                accordingly, then reports the real output in <C>/current/bulbState</C>. LDR readings are still logged but ignored for
+                switching, so the human decision always wins.
+              </P>
+              <CodeBlock
+                filename="manual control — dashboard.js + firmware"
+                code={`// dashboard.js — user flips the toggle
+bulbToggle.onchange = () => {
+  const newState = bulbToggle.checked ? "ON" : "OFF";
+  set(ref(db, "current/relay"), newState);
+};
+
+// Task_05 firmware — every 1 s
+if (Firebase.RTDB.getString(&fbdo, "/current/relay"))
+  manualOn = (fbdo.stringData() == "ON");
+...
+} else {            // mode == "MANUAL"
+  setRelay(manualOn);
+}`}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t5-modes">Manual / Automatic Mode &amp; Automatic Lighting Logic</Sub>
+            <p className="text-xs text-charcoal/75 leading-relaxed font-body mb-3">
+              The <b>System Mode</b> dropdown writes <C>&quot;AUTO&quot;</C> or <C>&quot;MANUAL&quot;</C> to <C>/current/mode</C>. The firmware
+              reads it every second and picks one of two branches. In AUTO the ESP32 also writes <C>/current/relay</C>, so the
+              dashboard switch shows what the automation decided and switching back to MANUAL starts from the same state.
+            </p>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="p-5 rounded-2xl border border-charcoal/15 bg-white shadow-sm">
                 <div className="flex items-center justify-between mb-2">
@@ -2208,10 +3202,116 @@ void loop() {
                 </p>
               </div>
             </div>
+            <div className="grid md:grid-cols-2 gap-4 mt-4 items-start">
+              <CodeBlock
+                filename="automatic lighting logic (with hysteresis)"
+                code={`// LDR on the 3.3V side, 10k to GND → darker = lower ADC
+void applyControlLogic(int ldr) {
+  if (mode == "AUTO") {
+    if (!relayOn && ldr < threshold - HYSTERESIS)      setRelay(true);   // dark   → ON
+    else if (relayOn && ldr > threshold + HYSTERESIS)  setRelay(false);  // bright → OFF
+  } else {
+    setRelay(manualOn);                                                  // MANUAL
+  }
+}`}
+              />
+              <ComparisonTable
+                headers={["Mode", "Light (threshold 1500)", "Bulb"]}
+                rows={[
+                  ["AUTO", "ldr < 1450 (dark)", "Turns ON"],
+                  ["AUTO", "1450 ≤ ldr ≤ 1550 (dead-band)", "Keeps its last state — no flicker at dusk"],
+                  ["AUTO", "ldr > 1550 (bright)", "Turns OFF"],
+                  ["MANUAL", "any value", "Follows the dashboard toggle"],
+                ]}
+              />
+            </div>
           </div>
 
           <div>
-            <Sub>Browser Client-Side CSV Export Engine</Sub>
+            <Sub id="t5-calibration">LDR Threshold / Calibration Method</Sub>
+            <div className="grid md:grid-cols-2 gap-6 items-start">
+              <Steps
+                items={[
+                  <><b>Measure the extremes:</b> with the dashboard open, read the live <C>ldr</C> value (also printed on Serial) with the sensor covered (dark), under normal lab lighting, and under a phone torch.</>,
+                  <><b>Pick the switching point:</b> the bulb should come on when the room is noticeably darker than normal lab light, so the threshold is set between the dark and ambient readings — about <b>1500</b> on this divider.</>,
+                  <><b>Add a dead-band:</b> ±50 counts around the threshold (1450 / 1550) so noise and slow dusk changes do not make the relay chatter.</>,
+                  <><b>Set it live:</b> move the <b>LDR Threshold</b> slider on the dashboard — it writes <C>/current/threshold</C> and the ESP32 uses the new value within a second, no re-flashing.</>,
+                  <><b>Verify:</b> in AUTO mode, cover and uncover the LDR and confirm the bulb switches once each way; the logged records show the light value and bulb state at each moment.</>,
+                ]}
+              />
+              <ComparisonTable
+                headers={["Condition", "Typical ADC", "Decision"]}
+                rows={[
+                  ["Covered / night", "< 800", "Dark → bulb ON"],
+                  ["Normal lab light", "1200 – 2200", "Around the threshold — tuned here"],
+                  ["Torch / direct sun", "> 3500", "Bright → bulb OFF"],
+                  ["Chosen threshold", "1500 ± 50", "Stored in /current/threshold"],
+                ]}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t5-logs">Historical Data Logging in Firebase — Database Structure for Logs</Sub>
+            <div className="grid md:grid-cols-2 gap-4 items-start">
+              <div className="space-y-3">
+                <P>
+                  Every 5 seconds the ESP32 writes one record under <C>/telemetry/logs</C>. The key is the Unix epoch time from
+                  NTP (<C>pool.ntp.org</C>), so records are unique, sort in time order automatically and can be queried with
+                  <C>orderByKey()</C> / <C>limitToLast()</C>. Each record stores the timestamp (both epoch and ISO-8601 UTC), the
+                  DHT11 temperature and humidity, the LDR level, the bulb status and the operating mode at that instant.
+                </P>
+                <P>
+                  Live values stay in <C>/current</C> (overwritten each time); history goes to <C>/telemetry/logs</C> (appended),
+                  which keeps the dashboard&apos;s live listener small while the history grows.
+                </P>
+              </div>
+              <CodeBlock
+                filename="RTDB — /telemetry/logs"
+                code={`telemetry
+└── logs
+    ├── 1712932210
+    │   ├── timestamp:   1712932210
+    │   ├── time:        "2024-04-12T14:30:10Z"
+    │   ├── temperature: 28.5
+    │   ├── humidity:    61.8
+    │   ├── ldr:         1420
+    │   ├── relay:       "ON"
+    │   └── mode:        "AUTO"
+    ├── 1712932215
+    │   └── { ... next record, 5 s later ... }
+    └── ...`}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t5-firmware">Complete System Firmware (Logging + Automation)</Sub>
+            <SourceFiles files={["Task_05_Firebase_Logging_CSV/Task_05_Firebase_Logging_CSV.ino"]} />
+          </div>
+
+          <div>
+            <Sub id="t5-history">Historical Data on the Dashboard &amp; Sensor Chart</Sub>
+            <p className="text-xs text-charcoal/70 font-body mb-2">
+              The history page listens to the last 500 records, shows the latest 20 in a table and draws a trend chart. The chart
+              below is rendered from the recorded dataset (green bands = bulb ON; dashed line = LDR threshold).
+            </p>
+            <HistoryChart />
+            <SourceFiles
+              files={[
+                "Task_05_Firebase_Logging_CSV/dashboard/history.html",
+                "Task_05_Firebase_Logging_CSV/dashboard/js/history.js",
+              ]}
+            />
+          </div>
+
+          <div>
+            <Sub id="t5-export">CSV Data Download Implementation</Sub>
+            <p className="text-xs text-charcoal/70 font-body mb-2">
+              Two ways to export the logs: the dashboard&apos;s <b>Download CSV</b> button builds the file in the browser from the
+              records already loaded (core function below, used in <C>history.js</C>), and <C>export_firebase_csv.py</C> pulls every
+              record through the REST API and prints summary statistics.
+            </p>
             <CodeBlock filename="exportSensorLog.ts" code={`type SensorLogEntry = {
   timestamp:   string; // ISO-8601 UTC
   temperature: number; // DHT11 °C
@@ -2252,11 +3352,20 @@ export function downloadSensorDataCSV(records: SensorLogEntry[]) {
   document.body.removeChild(downloadAnchor);
   URL.revokeObjectURL(url);
 }`} />
+            <SourceFiles files={["Task_05_Firebase_Logging_CSV/export_firebase_csv.py"]} />
           </div>
 
           <div>
-            <Sub>Downloaded File Verification &amp; Sample CSV Telemetry</Sub>
+            <Sub id="t5-csv">Downloaded File — Demonstrated to Contain the Recorded Data</Sub>
+            <p className="text-xs text-charcoal/70 font-body mb-2">
+              The exported file opened as a table: every row is one logged record with its timestamp, temperature, humidity,
+              light level, bulb status and operating mode. Press <b>Download this CSV</b> to get the same file.
+            </p>
             <CsvPreviewTable />
+            <CodeBlock
+              filename="iot_telemetry_2024-04-12.csv — opened in a text editor"
+              code={IOT_SOURCES[SAMPLE_CSV_PATH] ?? ""}
+            />
           </div>
 
           <div>
@@ -2288,39 +3397,79 @@ export function downloadSensorDataCSV(records: SensorLogEntry[]) {
           </div>
 
           <div>
-            <Sub>Lab Verification &amp; Evidence</Sub>
+            <Sub id="t5-evidence">Temperature, Humidity &amp; Light Monitoring Demonstrated — Screenshots, Photos &amp; Video</Sub>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <MediaImage
                 src="/media/media__1790510820927.png"
                 alt="System UI dashboard showing 24.5°C, 45% humidity, 1980 ambient light, AUTO-SENSE mode"
-                caption="Web dashboard telemetry feed: live readings, AUTO-SENSE threshold evaluation, relay active"
+                caption="Dashboard: DHT11 temperature & humidity and LDR ambient-light cards with AUTO-SENSE mode, relay and threshold controls"
+              />
+              <MediaImage
+                src="/media/f1.jpeg"
+                alt="Lab bench with ESP32 on breadboard, DHT11 and LDR modules, laptop showing live telemetry feed"
+                caption="Complete prototype on the lab bench: ESP32 + DHT11 + LDR module, laptop showing live readings (36.6 °C, 27 %, 2773) streaming from Firebase"
               />
               <MediaImage
                 src="/media/f2.jpeg"
                 alt="Lab desk with energized mains lamp driven by relay"
-                caption="Physical verification: 230V incandescent bulb illuminated on lab bench via optocoupler relay"
+                caption="Physical verification: 230V bulb illuminated on the lab bench via the optocoupler relay"
+              />
+              <MediaImage
+                src="/media/firebase-rtdb-console.png"
+                alt="Firebase Realtime Database console showing the current node"
+                caption="Firebase RTDB console: the live /current node the logger and dashboard share"
               />
               <MediaVideo
                 src="/media/dash_vid.mp4"
-                caption="End-to-end telemetry demonstration: mode toggle, threshold trigger, live telemetry sync"
+                caption="Complete system demonstration: dashboard mode / relay controls, threshold trigger and the bulb responding"
                 wide
               />
               <MediaVideo
                 src="/media/glue.mp4"
-                caption="Extended integration video: hardware bench setup, physical sensor stimuli, and dashboard response"
+                caption="Hardware assembly on the bench: securing the wiring of the prototype with a hot-glue gun"
                 wide
               />
             </div>
           </div>
 
           <div>
-            <Sub>Engineering Constraints &amp; Production Limitations</Sub>
+            <Sub id="t5-problems">Problems Encountered &amp; Solutions Implemented</Sub>
+            <TroubleshootCard
+              items={[
+                {
+                  issue: "Log Records Stamped 1970 Right After Boot",
+                  cause: "The ESP32 has no battery-backed clock; until NTP replies, time() returns seconds since boot, which would create records keyed near epoch 0.",
+                  solution: "setup() waits until the clock is past a sane date (epoch > 1 700 000 000) after configTime(), and every record stores both epoch and ISO-8601 UTC time.",
+                },
+                {
+                  issue: "Relay Chatter Around the Threshold at Dusk",
+                  cause: "With a single cut-off value, sensor noise of a few counts made the relay toggle repeatedly when the light level sat right at the threshold.",
+                  solution: "Added a ±50-count hysteresis band: ON below threshold − 50, OFF above threshold + 50, otherwise keep the current state.",
+                },
+                {
+                  issue: "Dashboard Toggle Disagreeing With the Real Bulb in AUTO Mode",
+                  cause: "In AUTO the ESP32 switched the relay by itself, but /current/relay still held the user's last manual value.",
+                  solution: "The firmware writes /current/relay and /current/bulbState whenever AUTO changes the relay, so the toggle always shows the true state.",
+                },
+                {
+                  issue: "Overwriting the User's Settings With Telemetry",
+                  cause: "Writing the whole /current object with set() replaced mode and threshold with the firmware's copies.",
+                  solution: "Switched to updateNode(), which only changes the telemetry keys the ESP32 owns.",
+                },
+              ]}
+            />
+          </div>
+
+          <div>
+            <Sub id="t5-limits">Limitations of the Current Prototype</Sub>
             <div className="grid sm:grid-cols-2 gap-3">
               {[
                 { title: "5-Second Sampling Window", note: "Not hard real-time; transient environmental spikes between intervals remain unsampled." },
                 { title: "Manual Threshold Calibrations", note: "The daylight threshold is set manually rather than dynamically adapting to seasonal shifts." },
                 { title: "Firebase Free-Tier Quotas", note: "High-frequency logging demands write-batching to stay within Firebase Spark limits." },
                 { title: "DHT11 Resolution", note: "DHT11 has 1°C temperature resolution; critical industrial setups require DHT22 or BME280." },
+                { title: "Cloud Dependency", note: "If Wi-Fi or Firebase is unreachable, the dashboard cannot control the bulb and no records are logged for that period." },
+                { title: "Test-Mode Security", note: "During development the database rules were left open and dashboard.html does not yet check login state; production needs the auth-only rules and an auth guard." },
               ].map((item, i) => (
                 <div key={i} className="p-3.5 rounded-xl border border-charcoal/15 bg-white">
                   <div className="font-mono text-xs font-bold text-charcoal mb-1 flex items-center gap-1.5">
@@ -2332,7 +3481,47 @@ export function downloadSensorDataCSV(records: SensorLogEntry[]) {
             </div>
           </div>
 
-          <Reflection text="Task 5 synthesized the entire semester's curriculum into a coherent engineering artifact. Persistent database logging and CSV export bridged the chasm between an ephemeral breadboard hobby project and an actionable data science pipeline. Coordinating real-time firmware loops, asynchronous database listeners, and responsive browser UI taught me how real embedded systems are delivered." />
+          <div>
+            <Sub id="t5-future">Possible Future Improvements</Sub>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                { title: "Lock down security", note: "Deploy the auth-only database rules and add an onAuthStateChanged() guard that sends signed-out visitors back to the login page." },
+                { title: "Offline buffering", note: "Store records in flash (LittleFS) when Wi-Fi drops and upload them when the connection returns, so the history has no gaps." },
+                { title: "Better sensors", note: "Replace DHT11 with DHT22 / BME280 for 0.1 °C resolution and add a lux sensor (BH1750) for calibrated light values." },
+                { title: "Adaptive threshold & scheduling", note: "Learn the threshold from logged data or combine it with sunset time, and add time-based schedules." },
+                { title: "Alerts & analytics", note: "Firebase Cloud Functions to send push/email alerts on high temperature and to roll old logs into daily averages." },
+                { title: "OTA updates & local fallback", note: "Over-the-air firmware updates and a physical switch / local web page that still works without the internet." },
+              ].map((item, i) => (
+                <div key={i} className="p-3.5 rounded-xl border border-charcoal/15 bg-white">
+                  <div className="font-mono text-xs font-bold text-charcoal mb-1 flex items-center gap-1.5">
+                    <span className="text-emerald-600">➜</span> {item.title}
+                  </div>
+                  <p className="text-xs text-charcoal/70 leading-relaxed font-body">{item.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Sub id="t5-repo">All Source Code &amp; Project Files in the Repository</Sub>
+            <RepoFiles
+              folders={["Task_05_Firebase_Logging_CSV"]}
+              iotRepoFolder="Task-05-Firebase-Logging-CSV-Analytics"
+              files={[
+                { path: "Task_05_Firebase_Logging_CSV/Task_05_Firebase_Logging_CSV.ino", note: "Complete system firmware (live + logging + modes)" },
+                { path: "Task_05_Firebase_Logging_CSV/dashboard/history.html", note: "History page" },
+                { path: "Task_05_Firebase_Logging_CSV/dashboard/js/history.js", note: "History table, chart and CSV download" },
+                { path: "Task_05_Firebase_Logging_CSV/export_firebase_csv.py", note: "REST → CSV exporter with statistics" },
+                { path: "Task_05_Firebase_Logging_CSV/sample_sensor_telemetry.csv", note: "Exported dataset" },
+                { path: "Task_04_Firebase_Dashboard/index.html", note: "Login + live dashboard reused from Task 4" },
+              ]}
+            />
+          </div>
+
+          <div id="t5-reflection" className="scroll-mt-44">
+            <Sub>Final Learning Reflection</Sub>
+            <Reflection text="Task 5 synthesized the entire semester's curriculum into a coherent engineering artifact. Persistent database logging and CSV export bridged the chasm between an ephemeral breadboard hobby project and an actionable data science pipeline. Coordinating real-time firmware loops, asynchronous database listeners, and responsive browser UI taught me how real embedded systems are delivered." />
+          </div>
         </TaskSection>
 
         {/* ══════════════════════════════════════

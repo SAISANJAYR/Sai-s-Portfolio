@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History - Smart Dashboard</title>
+  <!-- same stylesheet as the Task 04 dashboard (Task_04_Firebase_Dashboard/css/style.css) -->
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav>
+    <a href="dashboard.html" class="logo"><h2>System UI</h2></a>
+    <a href="dashboard.html" class="btn">Live Feed</a>
+  </nav>
+
+  <div class="dashboard-header">
+    <h1>Telemetry History</h1>
+    <p>Node: /telemetry/logs &middot; <span id="recordCount">0 records</span></p>
+  </div>
+
+  <section class="graph">
+    <h2>Sensor Trend</h2>
+    <canvas id="historyChart" height="120"></canvas>
+  </section>
+
+  <section class="table">
+    <h2>Latest 20 Records</h2>
+    <button id="downloadCsv" class="btn">Download CSV</button>
+    <table class="code-block" style="width:100%">
+      <thead>
+        <tr><th>Time (UTC)</th><th>Temp °C</th><th>Hum %</th><th>LDR</th><th>Bulb</th><th>Mode</th></tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </section>
+
+  <script type="module" src="js/history.js"></script>
+</body>
+</html>
