@@ -696,39 +696,6 @@ function Steps({ items }: { items: React.ReactNode[] }) {
 }
 
 /* ─────────────────────────────────────────────
-   Evaluation checklist coverage (per task)
-───────────────────────────────────────────── */
-function TaskChecklist({ items }: { items: { label: string; href: string }[] }) {
-  return (
-    <details open className="rounded-2xl border-2 border-emerald-300/70 bg-emerald-50/50 p-5 group">
-      <summary className="cursor-pointer list-none flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-emerald-900 flex items-center gap-2">
-          <span className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[11px]">✓</span>
-          Evaluation Checklist — where each item is documented
-        </span>
-        <span className="text-[10px] font-mono text-emerald-800/80">
-          {items.length} items · click to jump · <span className="group-open:hidden">show</span>
-          <span className="hidden group-open:inline">hide</span>
-        </span>
-      </summary>
-      <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-4">
-        {items.map((it, i) => (
-          <li key={i}>
-            <a
-              href={it.href}
-              className="flex items-start gap-2 text-[11px] font-body text-emerald-950 hover:text-black hover:underline underline-offset-2"
-            >
-              <span className="text-emerald-600 font-bold mt-px">☑</span>
-              <span>{it.label}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </details>
-  );
-}
-
-/* ─────────────────────────────────────────────
    Complete source viewer — renders the exact files
    committed under /iot-firmware (tabs, copy, GitHub link)
 ───────────────────────────────────────────── */
@@ -1596,25 +1563,6 @@ export default function IoTPageClient() {
           title="ESP32 Web Server & HTML LED Control"
           tag="HTTP / LOCAL"
         >
-          <TaskChecklist
-            items={[
-              { label: "Objective of the assignment and the problem being addressed", href: "#t1-objective" },
-              { label: "Basic concept of an ESP32 Web Server", href: "#t1-concepts" },
-              { label: "How the ESP32 and browser communicate over Wi-Fi", href: "#t1-wifi" },
-              { label: "Hardware components used", href: "#t1-hardware" },
-              { label: "Circuit/wiring diagram", href: "#t1-wiring" },
-              { label: "ESP32 pin connections", href: "#t1-wiring" },
-              { label: "Complete Arduino/ESP32 source code", href: "#t1-code" },
-              { label: "HTML interface developed for controlling the LED", href: "#t1-html" },
-              { label: "How the webpage sends a command to the ESP32", href: "#t1-command" },
-              { label: "Photographs of the physical setup", href: "#t1-evidence" },
-              { label: "Screenshots of the web interface", href: "#t1-evidence" },
-              { label: "Problems encountered and how they were solved", href: "#t1-problems" },
-              { label: "Brief reflection on what you learned", href: "#t1-reflection" },
-              { label: "All required files/code available in your repository", href: "#t1-repo" },
-            ]}
-          />
-
           <div>
             <Sub id="t1-objective">Objective &amp; Problem Statement</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
@@ -1904,30 +1852,6 @@ GET /status      ───────────────────▶ ha
           title="Adafruit IO Dashboard & MQTT Protocol"
           tag="MQTT / CLOUD"
         >
-          <TaskChecklist
-            items={[
-              { label: "Purpose of Adafruit IO in an IoT system", href: "#t2-purpose" },
-              { label: "Basic concept of MQTT", href: "#t2-concepts" },
-              { label: "MQTT Publisher, Subscriber, and Broker identified", href: "#t2-roles" },
-              { label: "Role of an MQTT Topic/Feed", href: "#t2-topics" },
-              { label: "Hardware and software used", href: "#t2-hardware" },
-              { label: "Adafruit IO account created and documented", href: "#t2-setup" },
-              { label: "Dashboard and feed configuration documented", href: "#t2-setup" },
-              { label: "Communication flow between ESP32, MQTT, and Adafruit IO", href: "#t2-flow" },
-              { label: "MQTT topic/feed structure used", href: "#t2-topics" },
-              { label: "Complete ESP32 source code", href: "#t2-code" },
-              { label: "Explanation of important code sections", href: "#t2-explain" },
-              { label: "Photographs of the hardware setup", href: "#t2-evidence" },
-              { label: "Screenshots of the Adafruit IO dashboard", href: "#t2-evidence" },
-              { label: "LED control through the cloud dashboard demonstrated", href: "#t2-evidence" },
-              { label: "Working demonstration video", href: "#t2-evidence" },
-              { label: "Problems encountered during MQTT/cloud setup", href: "#t2-problems" },
-              { label: "Solutions implemented", href: "#t2-problems" },
-              { label: "Brief learning reflection", href: "#t2-reflection" },
-              { label: "All required files available in your repository", href: "#t2-repo" },
-            ]}
-          />
-
           <div>
             <Sub>Objective &amp; Problem Statement</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
@@ -2240,30 +2164,6 @@ GET /status      ───────────────────▶ ha
           title="IFTTT + Adafruit IO Voice Automation & IoT Protocols"
           tag="WEBHOOKS / IFTTT"
         >
-          <TaskChecklist
-            items={[
-              { label: "Objective of the IoT automation", href: "#t3-objective" },
-              { label: "Basic concept of IoT automation", href: "#t3-automation" },
-              { label: "What IFTTT is and why it is used", href: "#t3-ifttt" },
-              { label: "Trigger → Action concept explained", href: "#t3-ifttt" },
-              { label: "Role of Adafruit IO in the automation", href: "#t3-ifttt" },
-              { label: "Hardware and software used", href: "#t3-hardware" },
-              { label: "IFTTT Applet/workflow created and documented", href: "#t3-applet" },
-              { label: "Trigger used identified", href: "#t3-applet" },
-              { label: "Action performed identified", href: "#t3-applet" },
-              { label: "How the trigger reaches the IoT system", href: "#t3-reach" },
-              { label: "Communication/data-flow diagram", href: "#t3-flow" },
-              { label: "ESP32 source code", href: "#t3-code" },
-              { label: "Screenshots of the Adafruit IO dashboard/feed", href: "#t3-evidence" },
-              { label: "Photographs of the working prototype", href: "#t3-evidence" },
-              { label: "Video demonstrating the complete automation", href: "#t3-evidence" },
-              { label: "Automation tested under different conditions", href: "#t3-tests" },
-              { label: "Problems and their solutions documented", href: "#t3-problems" },
-              { label: "What you learned about cloud-based automation", href: "#t3-learned" },
-              { label: "Brief reflection on the assignment", href: "#t3-reflection" },
-            ]}
-          />
-
           <div>
             <Sub id="t3-objective">Objective of the IoT Automation</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
@@ -2589,31 +2489,6 @@ Content-Type: application/json
           title="Firebase IoT Monitoring Dashboard &amp; Sensor Suite"
           tag="FIREBASE / SENSORS"
         >
-          <TaskChecklist
-            items={[
-              { label: "Objective of the Firebase IoT monitoring system", href: "#t4-objective" },
-              { label: "Basic concept of Cloud Computing", href: "#t4-cloud" },
-              { label: "IaaS, PaaS, SaaS, and BaaS explained", href: "#t4-models" },
-              { label: "What a Cloud Platform is", href: "#t4-platform" },
-              { label: "What a Database is", href: "#t4-platform" },
-              { label: "Firebase Realtime Database explained", href: "#t4-rtdb" },
-              { label: "What a Cloud-Based Dashboard is", href: "#t4-rtdb" },
-              { label: "Authentication and the purpose of a login system", href: "#t4-auth" },
-              { label: "Difference between Authentication and Authorization", href: "#t4-auth" },
-              { label: "Firebase project setup documented", href: "#t4-setup" },
-              { label: "Firebase Authentication configuration documented", href: "#t4-setup" },
-              { label: "Realtime Database structure documented", href: "#t4-schema" },
-              { label: "Database/data-flow architecture", href: "#t4-dataflow" },
-              { label: "Complete dashboard source code", href: "#t4-dashcode" },
-              { label: "Screenshots of the login page", href: "#t4-evidence" },
-              { label: "Screenshots of the Firebase database", href: "#t4-evidence" },
-              { label: "Screenshots of the working dashboard", href: "#t4-evidence" },
-              { label: "Video demonstrating webpage workflow", href: "#t4-evidence" },
-              { label: "Problems encountered and their solutions", href: "#t4-problems" },
-              { label: "Brief reflection on the assignment", href: "#t4-reflection" },
-            ]}
-          />
-
           <div>
             <Sub id="t4-objective">Objective of the Firebase IoT Monitoring System</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
@@ -3079,38 +2954,6 @@ Content-Type: application/json
           title="Firebase Logging, Automation &amp; Data Export"
           tag="ANALYTICS / CSV"
         >
-          <TaskChecklist
-            items={[
-              { label: "Objective of the complete IoT system", href: "#t5-objective" },
-              { label: "Final system architecture documented", href: "#t5-architecture" },
-              { label: "DHT11 Temperature and Humidity Monitoring demonstrated", href: "#t5-evidence" },
-              { label: "LDR-based Light Level Monitoring demonstrated", href: "#t5-evidence" },
-              { label: "Manual Bulb Control implemented", href: "#t5-manual" },
-              { label: "Automatic Bulb Control using LDR implemented", href: "#t5-modes" },
-              { label: "Manual / Automatic Mode implemented and documented", href: "#t5-modes" },
-              { label: "Logic used for automatic lighting explained", href: "#t5-modes" },
-              { label: "LDR threshold/calibration method documented", href: "#t5-calibration" },
-              { label: "Historical data logging in Firebase implemented", href: "#t5-logs" },
-              { label: "Database structure used for logs documented", href: "#t5-logs" },
-              { label: "Timestamped sensor readings recorded", href: "#t5-logs" },
-              { label: "Temperature and humidity values recorded", href: "#t5-csv" },
-              { label: "LDR/light-level values recorded", href: "#t5-csv" },
-              { label: "Bulb status and operating mode recorded", href: "#t5-csv" },
-              { label: "Historical data displayed on the dashboard", href: "#t5-history" },
-              { label: "Graph/chart for recorded sensor data included", href: "#t5-history" },
-              { label: "CSV data download implemented", href: "#t5-export" },
-              { label: "Downloaded file demonstrated to contain the recorded data", href: "#t5-csv" },
-              { label: "Screenshots of the dashboard and data visualization", href: "#t5-evidence" },
-              { label: "Photographs of the complete prototype", href: "#t5-evidence" },
-              { label: "Video demonstrating the complete system", href: "#t5-evidence" },
-              { label: "Problems encountered and solutions implemented", href: "#t5-problems" },
-              { label: "Limitations of the current prototype explained", href: "#t5-limits" },
-              { label: "Possible future improvements suggested", href: "#t5-future" },
-              { label: "Final learning reflection included", href: "#t5-reflection" },
-              { label: "All source code and project files available in the repository", href: "#t5-repo" },
-            ]}
-          />
-
           <div>
             <Sub id="t5-objective">Objective of the Complete IoT System</Sub>
             <p className="text-sm text-charcoal/80 leading-relaxed bg-zinc-50 p-5 rounded-2xl border border-charcoal/15 font-body">
