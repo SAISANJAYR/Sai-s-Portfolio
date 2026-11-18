@@ -1,66 +1,74 @@
 # SaiSanjay R — Portfolio
 
-Next.js 14 (App Router) + TypeScript + Tailwind + GSAP + Three.js + Lenis.
-
-## Run locally
+Next.js 14 (App Router) · TypeScript · GSAP · Lenis. Deployed on Vercel.
 
 ```bash
 npm install
-npm run dev
+npm run dev      # http://localhost:3000
+npm run build    # production build (type-checks + prerenders every route)
 ```
 
-Open http://localhost:3000
-
-## Structure
+## Two root layouts — and why
 
 ```
 app/
-  layout.tsx        global chrome: fonts, nav, cursor, grain, particle background
-  page.tsx           home page (assembles the sections below)
-  globals.css         the whole design system (tokens, glass, motion classes)
-  journey/            stub route — flesh out with the tech-journey timeline
-  research/           stub route
-  protosem/           stub route — replace with the weekly journal timeline
-  resume/              stub route
-  contact/             stub route
-
-components/
-  Nav.tsx              real Next.js routing between pages (this fixes the
-                        "doesn't take me anywhere" issue from the single-file version)
-  Cursor.tsx            custom cursor
-  Grain.tsx              film-grain overlay
-  SmoothScroll.tsx        Lenis smooth-scroll wrapper
-  ParticleField.tsx       the Three.js background layer
-  Hero.tsx                greeting / name / signature / portrait / facts
-  TechStack.tsx            renders data/techStack.ts, one card per technology
-  Projects.tsx / Hobbies.tsx   horizontal scroll-jacked sections
-  HorizontalScrollSection.tsx   shared GSAP ScrollTrigger pin-and-scrub logic
-  ClosingCTA.tsx, Footer.tsx, ComingSoon.tsx
-
-data/
-  techStack.ts    edit this to change your tech stack — icon strings map to
-                    react-icons/di or react-icons/si component names
-  projects.ts     edit this for real project copy (Problem/Process/Architecture/
-                    Challenges/Outcome per the brief)
-  hobbies.ts      hobby cards + the Spotify track id
+  (site)/          the portfolio — its own <html>, fonts, nav, footer, site.css
+    layout.tsx     Instrument Serif · Manrope · IBM Plex Mono, page transition, nav
+    site.css       the entire design system (tokens, type, layout, motion)
+    page.tsx       home — hands hero, intro, signature, craft, project reel
+    about/         about, now, ideas, hobbies, Spotify
+    projects/      GitHub activity + tiles, projects/[slug] write-ups (static)
+    journey/ resume/ contact/ research/
+  (legacy)/        ProtoSem — FROZEN, see below
+    layout.tsx     the original root layout, byte-for-byte
+    globals.css    the original stylesheet (+ Tailwind), byte-for-byte
+    protosem/  iot/
 ```
 
-## Why this structure (not a single HTML file)
+Each route group has its **own root layout**. Next.js does a full document load
+when navigating between root layouts, so no CSS, JS or chrome from the redesign
+can ever reach ProtoSem — and vice-versa.
 
-The first draft was one static `.html` file so you could preview it instantly in
-chat — fine for a quick look, unworkable for a real site: no routing (which is
-why nav links didn't go anywhere), no component reuse, nothing you can
-version-control sanely. This is the real, editable codebase: each page is a
-route, each section is a component, and the content that will change most
-(projects, tech stack, hobbies) lives in plain data files in `data/` so you
-never have to touch layout/animation code just to add a project.
+### ProtoSem is read-only
 
-## What to fill in next
+Do not edit anything under `app/(legacy)/`, nor the files it depends on:
+`components/{Nav,Footer,Cursor,Grain,SmoothScroll}.tsx`, `tailwind.config.ts`,
+`postcss.config.mjs`, `data/protosem.json`, `public/media/`, `iot-firmware/`.
 
-- `components/Hero.tsx` — swap the photo placeholder for `<img src="/your-photo.jpg" ... />`
-  (drop the file in `public/`)
-- `data/projects.ts` — real project copy
-- `data/techStack.ts` — your real stack (icon names come from `react-icons`'
-  `di` and `si` sets — see https://react-icons.github.io/react-icons)
-- `app/journey`, `app/research`, `app/protosem`, `app/resume`, `app/contact` —
-  currently placeholder pages, build these out next
+The site's stylesheet is intentionally **Tailwind-free**: two Tailwind configs in
+one Next build share JIT caches and the second one silently loses utilities,
+which would break ProtoSem's styling.
+
+Links from the site into ProtoSem are plain `<a href="/protosem">`, never
+`next/link`.
+
+## Where content lives
+
+| File | What |
+| --- | --- |
+| `data/profile.ts` | name, links, roles, tech stack (+ notes, icons), facts ribbon, hobbies, Spotify |
+| `data/projects.ts` | every project + write-up content; `missing` lists gaps |
+| `data/journey.json` | the six narrative chapters |
+| `data/milestones.ts` | the dated ledger on the Journey page |
+| `public/SaiSanjayR_Resume.pdf` | the downloadable résumé |
+| `public/art/` | fingertip-aligned Creation of Adam hands (WebP), signature (transparent PNG) |
+
+Projects without real screenshots get a labelled **system schematic**
+(`components/site/Schematic.tsx`) drawn from their documented architecture.
+Add `image` to a project in `data/projects.ts` to replace it with a photo.
+
+## Motion
+
+- **Home** (inspired by sudharshan-r.vercel.app): the hands fill the screen
+  edge to edge and drift apart on scroll (`HeroScroll`); the name reveals left
+  to right over a centred portrait with the signature inked in behind it and a
+  ribbon of facts (`Identity`);
+  a pinned horizontal reel shows the projects with tilting photos
+  (`WorkSlides`); dark tool cards flip light on hover (`Stack`, icons from
+  `simple-icons`, rendered on the server).
+- The hands appear only on the home page. Other pages simply fade in.
+- Scroll effects write one CSS variable per section (`useScrollProgress`);
+  reveals use a single IntersectionObserver; Lenis smooths scrolling on
+  desktop. Everything is reduced or off under `prefers-reduced-motion`.
+- Project photos in `public/projects/` are Unsplash stock photos (credited on
+  each project page); swap in real screenshots when available.
