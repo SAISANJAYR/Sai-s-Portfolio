@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     template: "%s — SaiSanjay R",
   },
   description:
-    "SaiSanjay R — computer science student in Coimbatore building agentic AI, backend systems and neural networks from first principles. ProtoSem intern at Forger Innovations & Ventures; Qbotix Rover Team, Software.",
+    "SaiSanjay R — computer science student in Coimbatore building agentic AI, backend systems and neural networks from first principles. Engineering Intern at Forge Innovations & Ventures; AI & Vision at Qbotix Rover Team.",
   authors: [{ name: "SaiSanjay R", url: siteUrl }],
   openGraph: {
     type: "website",

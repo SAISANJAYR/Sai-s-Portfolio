@@ -10,7 +10,7 @@
 
 export type Status = "Shipped" | "Complete" | "In progress" | "Ongoing" | "Hackathon" | "Documented" | "Unspecified";
 
-export type Schematic = "agents" | "pipeline" | "mlp" | "env" | "vision" | "device" | "satellite";
+export type Schematic = "agents" | "pipeline" | "mlp" | "env" | "vision" | "device" | "satellite" | "gas";
 
 export type Figure = { src: string; alt: string; caption: string; w: number; h: number };
 
@@ -49,21 +49,54 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    slug: "atmosyn",
+    title: "Atmosyn",
+    subtitle: "Industrial gas-emissions monitoring",
+    category: "Embedded · Telemetry",
+    status: "In progress",
+    date: "Jul 2026 — present",
+    year: "2026",
+    quote: "Measuring what leaves the exhaust line, as it leaves.",
+    intro:
+      "A modular system that measures CO₂, CO, particulate matter, temperature and humidity straight from industrial exhaust lines, with a live telemetry dashboard.",
+    credit: "Built as an Engineering Intern at Forge Innovations & Ventures — electronics and software stack.",
+    photo: {
+      src: "/projects/atmosyn-warm.jpg",
+      alt: "An industrial smokestack releasing a thick plume of white smoke against a pale sky.",
+      credit: "Photo: Patrick Hendry / Unsplash",
+      href: "https://unsplash.com/photos/white-smoke-coming-out-from-brown-metal-pipe-MQ6KtSsfgIc",
+    },
+    tech: ["ESP32", "Multi-sensor arrays", "CO₂ · CO · PM sensing", "Temperature & humidity", "Real-time telemetry", "Monitoring dashboard"],
+    schematic: "gas",
+    problem: [
+      "Industrial exhaust needs to be measured where it leaves the line — continuously, across several gases and particulates at once — not sampled now and then.",
+    ],
+    approach: [
+      "A **modular** monitoring unit designed to read **CO₂, CO, particulate matter, temperature and humidity** directly from exhaust lines.",
+      "**Multi-sensor arrays** interfaced with **ESP32** microcontrollers for real-time data acquisition, **timestamping** and transmission.",
+      "A **real-time monitoring dashboard** for live telemetry visualisation and **sensor health** tracking.",
+    ],
+    results: ["In active development as part of the internship."],
+    resultsLabel: "Current progress",
+    links: [{ label: "ProtoSem log", href: "/protosem", fullLoad: true }],
+    missing: ["Photos of the hardware", "Dashboard screenshot", "Sensor models used"],
+  },
+  {
     slug: "prregression-audit",
     title: "PRRegression Audit",
     subtitle: "Multi-agent RL code reviewer",
     category: "AI · Reinforcement learning",
-    status: "Shipped",
+    status: "Complete",
     date: "Apr 2026",
     year: "2026",
     quote: "A code reviewer that can’t game its own grader.",
     intro:
       "Four cooperating agents review pull requests for regressions, fine-tuned with GRPO against verifiable, zero-LLM rewards.",
     credit:
-      "Built with Sudharshan R at the Meta PyTorch OpenEnv Hackathon × Scaler School of Technology, Bengaluru — where the team reached the Grand Finale.",
+      "Co-created with Sudharshan R for the OpenEnv Hackathon (Scaler School of Technology × Meta × Hugging Face × PyTorch), Bengaluru — where the team reached the Grand Finale.",
     award: "Grand Finalist · Meta PyTorch OpenEnv Hackathon",
     photo: {
-      src: "/projects/prregression.jpg",
+      src: "/projects/prregression-warm.jpg",
       alt: "A laptop on a desk showing lines of source code in a dark editor.",
       credit: "Photo: Arnold Francisca / Unsplash",
       href: "https://unsplash.com/photos/turned-on-macbook-pro-wit-programming-codes-display-f77Bh3inUpE",
@@ -89,27 +122,27 @@ export const projects: Project[] = [
     ],
     resultsLabel: "Results",
     links: [
-      { label: "Repository", href: "https://github.com/rsd-06/GitPRTriageEnv", external: true },
+      { label: "Repository", href: "https://github.com/SAISANJAYR/GitPRTriageEnv", external: true },
       { label: "Live environment", href: "https://huggingface.co/spaces/rsd-06/PRRegressionAuditEnv", external: true },
     ],
-    missing: ["Which parts you built vs Sudharshan", "Screenshot of the W&B dashboard"],
+    missing: ["Screenshot of the W&B dashboard"],
   },
   {
     slug: "smart-document-hub",
     title: "Smart Document Hub",
     subtitle: "Multilingual document intelligence",
     category: "AI · Full-stack",
-    status: "In progress",
-    date: "Jun 2026 — present",
+    status: "Complete",
+    date: "Jun 2026",
     year: "2026",
     quote: "Ask your documents — and catch the deadlines inside them.",
     intro:
       "A multilingual platform that reads documents, answers questions about them and pulls out the deadlines buried inside.",
     photo: {
-      src: "/projects/dochub.jpg",
-      alt: "Tall stacks of paper documents and file folders in an office.",
-      credit: "Photo: Wesley Tingey / Unsplash",
-      href: "https://unsplash.com/photos/stacks-of-paper-documents-and-file-folders-snNHKZ-mGfE",
+      src: "/projects/dochub-warm.jpg",
+      alt: "A feather quill resting on the pages of an old handwritten ledger.",
+      credit: "Photo: camera obscura / Unsplash",
+      href: "https://unsplash.com/photos/feather-quill-rests-on-an-old-handwritten-ledger-mAcZ7DXz5QM",
     },
     tech: ["FastAPI", "Next.js", "LangChain", "LlamaIndex", "ChromaDB", "MongoDB (Beanie ODM)", "Celery", "Redis", "spaCy", "EasyOCR", "Gemini", "D3.js"],
     schematic: "pipeline",
@@ -127,32 +160,32 @@ export const projects: Project[] = [
       "**Latency under load.** Keeping the interface responsive while OCR, embedding and classification run — the reason heavy work lives in Celery workers rather than in the API process.",
     ],
     results: [
-      "In active development — the architecture above is being built now.",
-      "The sub-2-second Q&A figure is a **design target**, not yet a measured result.",
+      "Complete: an async FastAPI + MongoDB backend with a Celery + Redis worker pipeline that keeps heavy document processing off the request path and **Q&A under 2 seconds**.",
+      "A hybrid deadline-extraction engine — local **spaCy NER** with **LangChain / Gemini** classification — and a **ChromaDB** vector knowledge graph.",
     ],
-    resultsLabel: "Current progress",
-    links: [],
-    missing: ["GitHub repository URL", "Interface screenshots", "Measured latency once available", "Languages supported"],
+    resultsLabel: "Outcome",
+    links: [{ label: "Repository", href: "https://github.com/SAISANJAYR/smart-document-hub", external: true }],
+    missing: ["Interface screenshots", "Languages supported"],
   },
   {
     slug: "satsaathi",
     title: "SatSaathi",
     subtitle: "Ask the satellite, in your language",
     category: "AI · Remote sensing",
-    status: "In progress",
-    date: "2026 — present",
+    status: "Complete",
+    date: "2026",
     year: "2026",
     quote: "Ask the satellite, in your language.",
     intro:
-      "A vision-language assistant for satellite imagery: upload a scene, ask in English, Hindi, Tamil or Bangla, and get an answer measured from the pixels — every step shown.",
+      "An auditable satellite-imagery copilot: ask in English, Hindi, Tamil or Bangla and get an answer measured from the pixels — with an eight-step trace and human review when confidence is low.",
     credit: "Built with Sudharshan R as Team MidDevz — Smart India Hackathon 2026, ISRO’s SatQuery AI problem.",
     photo: {
-      src: "/projects/satsaathi.jpg",
-      alt: "Earth seen from orbit, clouds over the ocean, with part of a spacecraft in the corner.",
-      credit: "Photo: NASA / Unsplash",
-      href: "https://unsplash.com/photos/view-of-earth-and-satellite-yZygONrUBe8",
+      src: "/projects/satsaathi-warm.jpg",
+      alt: "Satellite image of a river delta, braided channels spreading across the land.",
+      credit: "Satellite image: USGS / Unsplash",
+      href: "https://unsplash.com/photos/aerial-view-of-a-river-delta-with-colorful-sediment-patterns-2BThgnOYoIc",
     },
-    tech: ["Next.js", "Tailwind CSS", "next-intl", "FastAPI", "Celery", "Python", "SSE", "PostGIS", "rasterio", "TiTiler", "Redis", "Docker Compose", "GitHub Actions"],
+    tech: ["Qwen3-VL-2B (4-bit LoRA)", "FastAPI", "Celery", "Redis", "SSE", "Next.js", "Python", "PostGIS", "rasterio", "TiTiler", "Docker Compose"],
     schematic: "satellite",
     problem: [
       "Answering questions from satellite imagery — how far a flood spread, what changed between two dates — usually needs GIS expertise and English-only tools.",
@@ -163,14 +196,16 @@ export const projects: Project[] = [
       "A monorepo with a **Next.js** web app, a **FastAPI** API, **Celery** workers, **PostgreSQL / PostGIS**, **Redis** and **TiTiler** for map tiles.",
       "Every query is a **Job** that passes through a fixed eight-step pipeline — ask, imagery, understand, preprocess, compute, vision-language, verify, answer — each step recording its tool, parameters, timing and output.",
       "Model-backed steps sit behind a **stable tool interface**, so real weights drop in without touching the rest. Full **en / hi / ta / bn** localisation is shared by the interface and the exported reports.",
+      "Pixel-level **spectral indices (NDVI, NDWI, LSWI)** and ground-area calculation, alongside a **4-bit Qwen3-VL-2B LoRA** inference pipeline.",
+      "An **async FastAPI + Celery / Redis** backend streams live job progress to the **Next.js** interface over **Server-Sent Events**; low-confidence answers are routed to **human review**.",
     ],
     results: [
       "Working end to end: image upload with raster checks, spectral indices, jobs streamed live over **SSE** with a step-by-step trace, GeoJSON and trace export, multi-temporal change detection, and per-account isolation — in four languages.",
-      "In active development for SIH 2026. The vision-language model steps are being wired into the tool interface next.",
+      "Complete, with the **4-bit Qwen3-VL-2B LoRA** model running behind the tool interface and confidence-gated **human review** for low-confidence answers.",
     ],
-    resultsLabel: "Current progress",
+    resultsLabel: "Outcome",
     links: [{ label: "Repository", href: "https://github.com/rsd-06/sat_saathi", external: true }],
-    missing: ["Your specific role / the parts you built", "Screenshots of the interface"],
+    missing: ["Screenshots of the interface"],
   },
 ];
 

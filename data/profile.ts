@@ -10,13 +10,13 @@ export const profile = {
   college: "Kumaraguru College of Technology",
   city: "Coimbatore, India",
   graduation: "Expected May 2028",
-  cgpa: "8.25 / 10.00",
+  cgpa: "8.28 / 10.00",
   email: "saisanjay024@gmail.com",
   github: "https://github.com/SAISANJAYR",
   githubHandle: "SAISANJAYR",
-  linkedin: "https://www.linkedin.com/in/saisanjay-r-79513132a",
+  linkedin: "https://www.linkedin.com/in/saisanjay-r",
   linkedinHandle: "saisanjay-r",
-  resumePdf: "/SaiSanjayR_Resume.pdf",
+  resumePdf: "/SaiSanjay_R_Resume.pdf",
   portfolioRepo: "https://github.com/SAISANJAYR/Sai-s-Portfolio",
   motto: "May Death Find me Alive",
   /** The personal line from the original hero. */
@@ -51,27 +51,27 @@ export type Role = {
 
 export const roles: Role[] = [
   {
-    title: "ProtoSem Intern",
-    org: "Forger Innovations & Ventures",
+    title: "Engineering Intern",
+    org: "Forge Innovations & Ventures",
     when: "Jul 2026 — Present",
     kind: "Internship",
-    line: "A 20-week interdisciplinary programme — building across disciplines, documented week by week in a public log.",
+    line: "Electronics and software for Atmosyn, an industrial gas-emissions monitor — documented week by week in the ProtoSem log.",
     href: protosemHref,
     fullLoad: true,
   },
   {
-    title: "Member, Software domain",
+    title: "AI & Vision Member",
     org: "Qbotix Rover Team",
     when: "Sep 2026 — Present",
     kind: "Student team",
-    line: "A student-led rover team. I work in the Software domain.",
+    line: "YOLO perception, ROS 2 navigation with SLAM and Nav2, and camera telemetry for a student-built rover.",
   },
   {
     title: "B.Tech, AI & Data Science",
     org: "Kumaraguru College of Technology",
-    when: "Expected May 2028",
+    when: "Sep 2024 — May 2028",
     kind: "Education",
-    line: "Coimbatore. CGPA 8.25 / 10, Mahatma Gandhi Merit Scholar (2025–26).",
+    line: "Coimbatore. CGPA 8.28 / 10, Mahatma Gandhi Merit Scholar (2025–26).",
   },
 ];
 
@@ -98,58 +98,41 @@ export const workKinds = [
 export type StackItem = { name: string; group: string; note: string; icon?: string };
 
 /**
- * The tech stack — from the original site's stack section and the résumé.
+ * The tech stack — exactly the skills on the current résumé, plus the tools
+ * its projects and roles name (Celery, Next.js, ESP32, ROS 2, YOLO).
  * `icon` is a simple-icons export name; items without one get a lettermark.
  * `note` describes the tool itself, not a claim about its use.
  */
 export const stack: StackItem[] = [
   { name: "Python", group: "Language", note: "ML, backends & scripting", icon: "siPython" },
-  { name: "C++", group: "Language", note: "Performance & firmware", icon: "siCplusplus" },
   { name: "C", group: "Language", note: "Close to the metal", icon: "siC" },
-  { name: "TypeScript", group: "Language", note: "Type-safe JavaScript", icon: "siTypescript" },
-  { name: "JavaScript", group: "Language", note: "The web’s language", icon: "siJavascript" },
+  { name: "C++", group: "Language", note: "Performance & firmware", icon: "siCplusplus" },
+  { name: "Java", group: "Language", note: "Object-oriented core", icon: "siOpenjdk" },
   { name: "PyTorch", group: "ML", note: "Training & fine-tuning", icon: "siPytorch" },
   { name: "JAX", group: "ML", note: "Autodiff + XLA, by hand" },
   { name: "TensorFlow", group: "ML", note: "Deep learning for vision", icon: "siTensorflow" },
-  { name: "Keras", group: "ML", note: "High-level neural nets", icon: "siKeras" },
+  { name: "LoRA", group: "ML", note: "Parameter-efficient fine-tuning" },
   { name: "Weights & Biases", group: "ML", note: "Experiment tracking", icon: "siWeightsandbiases" },
   { name: "Hugging Face", group: "ML", note: "Models, datasets & Spaces", icon: "siHuggingface" },
-  { name: "LangChain", group: "LLM", note: "LLM pipelines", icon: "siLangchain" },
+  { name: "LangChain", group: "LLM", note: "LLM pipelines & agents", icon: "siLangchain" },
   { name: "LlamaIndex", group: "LLM", note: "Retrieval over documents" },
-  { name: "ChromaDB", group: "LLM", note: "Vector store" },
+  { name: "ChromaDB", group: "LLM", note: "Vector store for RAG" },
+  { name: "YOLO", group: "Vision", note: "Real-time object detection" },
+  { name: "ROS 2", group: "Robotics", note: "SLAM & Nav2 navigation", icon: "siRos" },
+  { name: "ESP32", group: "Embedded", note: "Sensor acquisition & telemetry", icon: "siEspressif" },
   { name: "FastAPI", group: "Backend", note: "Async Python APIs", icon: "siFastapi" },
-  { name: "Flask", group: "Backend", note: "Lightweight Python web", icon: "siFlask" },
-  { name: "Node.js", group: "Backend", note: "Server runtime", icon: "siNodedotjs" },
   { name: "Celery", group: "Backend", note: "Background task queues", icon: "siCelery" },
   { name: "Redis", group: "Database", note: "In-memory store & broker", icon: "siRedis" },
   { name: "MongoDB", group: "Database", note: "Document store", icon: "siMongodb" },
-  { name: "PostgreSQL", group: "Database", note: "Relational database", icon: "siPostgresql" },
-  { name: "React", group: "Frontend", note: "Component architecture", icon: "siReact" },
-  { name: "Next.js", group: "Frontend", note: "Full-stack framework", icon: "siNextdotjs" },
+  { name: "MySQL", group: "Database", note: "Relational database", icon: "siMysql" },
+  { name: "Next.js", group: "Frontend", note: "Web interfaces", icon: "siNextdotjs" },
   { name: "Docker", group: "DevOps", note: "Containerisation", icon: "siDocker" },
   { name: "Git", group: "Tools", note: "Version control", icon: "siGit" },
   { name: "GitHub", group: "Tools", note: "Code & collaboration", icon: "siGithub" },
-  { name: "Linux", group: "Tools", note: "Home base", icon: "siLinux" },
-  { name: "AWS", group: "Cloud", note: "Cloud infrastructure", icon: "siAmazonwebservices" },
 ];
 
-/**
- * Small true things — from the original site (songs, books, films, running,
- * the Kenobi easter egg), the Journey chapters and the motto.
- */
-export const facts = [
-  "On repeat — Little by Little, Oasis",
-  "Also on repeat — The Narcissist, Blur",
-  "Does his best thinking mid-run",
-  "Into the Wild still hasn’t left him",
-  "Reads mythology, philosophy & 1984",
-  "Finished CS50P on his own in 12th standard",
-  "Say “Hello there.” — he’ll say “General Kenobi.”",
-  "Follows curiosities, not hobbies",
-  "Motto — May Death Find me Alive",
-];
 
-export const exploring = ["LLM engineering", "RAG systems", "Distributed systems", "AI research"];
+export const exploring = ["Agentic AI", "RAG systems", "Robot perception", "AI research"];
 
 export type Hobby = { title: string; line: string };
 
@@ -181,8 +164,9 @@ export const hobbies: Hobby[] = [
   },
 ];
 
-/** Spotify embeds from the original site. */
-export const listening = [
-  { label: "Currently on repeat", src: "https://open.spotify.com/embed/track/3tQFthLmtBuc0XPL2b8nnu?utm_source=generator&theme=0" },
-  { label: "Just for you", src: "https://open.spotify.com/embed/track/2TNyNqT3RBXhtNV7OiAgiC?utm_source=generator&theme=0" },
-];
+/** The one song — loaded straight away, no click needed. */
+export const song = {
+  title: "The Narcissist",
+  artist: "Blur",
+  src: "https://open.spotify.com/embed/track/2TNyNqT3RBXhtNV7OiAgiC?utm_source=generator&theme=0",
+};

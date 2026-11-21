@@ -50,7 +50,7 @@ Links from the site into ProtoSem are plain `<a href="/protosem">`, never
 | `data/projects.ts` | every project + write-up content; `missing` lists gaps |
 | `data/journey.json` | the six narrative chapters |
 | `data/milestones.ts` | the dated ledger on the Journey page |
-| `public/SaiSanjayR_Resume.pdf` | the downloadable résumé |
+| `public/SaiSanjay_R_Resume.pdf` | the downloadable résumé |
 | `public/art/` | fingertip-aligned Creation of Adam hands (WebP), signature (transparent PNG) |
 
 Projects without real screenshots get a labelled **system schematic**
@@ -59,16 +59,21 @@ Add `image` to a project in `data/projects.ts` to replace it with a photo.
 
 ## Motion
 
-- **Home** (inspired by sudharshan-r.vercel.app): the hands fill the screen
-  edge to edge and drift apart on scroll (`HeroScroll`); the name reveals left
-  to right over a centred portrait with the signature inked in behind it and a
-  ribbon of facts (`Identity`);
-  a pinned horizontal reel shows the projects with tilting photos
-  (`WorkSlides`); dark tool cards flip light on hover (`Stack`, icons from
-  `simple-icons`, rendered on the server).
+- **Home**: the hands fill the screen edge to edge and drift apart on scroll
+  (`HeroScroll`); the name reveals left to right over a centred portrait, with
+  the signature and faint original line drawings (films, music, books,
+  running, travel) behind it — hover one to see what it is (`Identity`,
+  `Glyphs`); projects swing round an arc on a dark-brown panel, the centred one
+  enlarged (`WorkSlides`); tool cards (`Stack`); hobbies and one song (`OffClock`).
 - The hands appear only on the home page. Other pages simply fade in.
-- Scroll effects write one CSS variable per section (`useScrollProgress`);
-  reveals use a single IntersectionObserver; Lenis smooths scrolling on
-  desktop. Everything is reduced or off under `prefers-reduced-motion`.
-- Project photos in `public/projects/` are Unsplash stock photos (credited on
-  each project page); swap in real screenshots when available.
+- Scroll effects write CSS variables (`useScrollProgress`); reveals use one
+  IntersectionObserver; Lenis smooths desktop scrolling. Everything is reduced
+  or off under `prefers-reduced-motion`.
+- Project photos in `public/projects/` are Unsplash/USGS photos given one warm
+  tritone grade so they match the palette (credited on each project page).
+  `public/my_profile_clear.jpg` is a 2× EDSR upscale of `my_profile.png` plus a light clarity pass.
+- Favicon and cursors are the site’s own: two upright Instrument Serif “S”
+  side by side (Sai · Sanjay), obsidian on parchment (`app/(site)/icon1.svg`,
+  `icon2.png`, `apple-icon.png`); the cursor is a small solid dot that becomes
+  a thin ring on links, obsidian on light areas and parchment on dark ones
+  (`public/cursor/`, 1× and 2× PNGs). ProtoSem keeps its own cursor and has no favicon.

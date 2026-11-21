@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 export const revalidate = 43200;
 
 export default function ProjectsPage() {
-  const inProgress = projects.filter((p) => p.status === "In progress").length;
-  const hackathons = projects.filter((p) => p.credit).length;
+  const completed = projects.filter((p) => p.status === "Complete" || p.status === "Shipped").length;
+  const hackathons = projects.filter((p) => /hackathon/i.test(p.credit ?? "")).length;
   return (
     <>
       <main id="main" className="main--rounded">
@@ -33,8 +33,8 @@ export default function ProjectsPage() {
                 <dd>{pad(hackathons)}</dd>
               </div>
               <div>
-                <dt className="t-label t-muted">In progress</dt>
-                <dd>{pad(inProgress)}</dd>
+                <dt className="t-label t-muted">Completed</dt>
+                <dd>{pad(completed)}</dd>
               </div>
             </dl>
           </div>

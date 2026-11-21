@@ -60,7 +60,7 @@ export default function SiteFooter() {
                   The weekly log ↗
                 </a>
               </li>
-              <li className="t-muted">Internship at Forger Innovations &amp; Ventures, documented week by week.</li>
+              <li className="t-muted">Internship at Forge Innovations &amp; Ventures, documented week by week.</li>
             </ul>
           </div>
           <div className="footer__col">

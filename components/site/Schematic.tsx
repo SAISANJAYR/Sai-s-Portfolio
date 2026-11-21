@@ -228,7 +228,36 @@ function Satellite() {
   );
 }
 
+function Gas() {
+  const sensors = ["CO₂", "CO", "PM", "TEMP · RH"];
+  return (
+    <>
+      {/* exhaust line */}
+      <path d="M40 470 L40 120 Q40 100 60 100 L120 100" className="s-line" />
+      <text x="40" y="500" textAnchor="middle" fontSize="10" opacity="0.6" letterSpacing="1.4">
+        EXHAUST
+      </text>
+      {sensors.map((s, i) => (
+        <g key={s}>
+          <Node x={120} y={90 + i * 90} w={120} h={50} label={s} sub="sensor" />
+          <Arrow d={`M240 ${115 + i * 90} L330 ${200 + i * 30}`} />
+        </g>
+      ))}
+      <Node x={330} y={210} w={150} h={110} label="ESP32" sub="acquire · timestamp" accent />
+      <path d="M480 265 L590 265" className="s-flow" />
+      <text x="535" y="252" textAnchor="middle" fontSize="9.5" opacity="0.6" letterSpacing="1">
+        transmit
+      </text>
+      <Node x={590} y={190} w={170} h={150} label="DASHBOARD" sub="live telemetry" accent />
+      <text x="675" y="310" textAnchor="middle" fontSize="9.5" opacity="0.6" letterSpacing="0.8">
+        sensor health
+      </text>
+    </>
+  );
+}
+
 const map: Record<Kind, () => JSX.Element> = {
+  gas: Gas,
   satellite: Satellite,
   agents: Agents,
   pipeline: Pipeline,

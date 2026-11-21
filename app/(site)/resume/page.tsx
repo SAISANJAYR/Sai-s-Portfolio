@@ -8,67 +8,79 @@ import { profile } from "@/data/profile";
 export const metadata: Metadata = {
   title: "Résumé",
   description:
-    "Résumé of SaiSanjay R — B.Tech AI & Data Science, Kumaraguru College of Technology. Skills, projects, leadership and achievements, with a downloadable PDF.",
+    "Résumé of SaiSanjay R — B.Tech AI & Data Science at Kumaraguru College of Technology. Engineering Intern at Forge Innovations & Ventures, AI & Vision at Qbotix Rover Team. Skills, projects and achievements, with a downloadable PDF.",
 };
 
 const sections = [
-  { id: "profile", label: "Profile" },
   { id: "education", label: "Education" },
   { id: "skills", label: "Technical skills" },
   { id: "experience", label: "Experience" },
-  { id: "projects", label: "Selected projects" },
-  { id: "leadership", label: "Leadership & teams" },
+  { id: "projects", label: "Projects" },
   { id: "achievements", label: "Achievements" },
-  { id: "activities", label: "Activities" },
 ];
 
+/** Mirrors the current résumé PDF, section for section. */
 const skills: [string, string][] = [
-  ["Languages", "Python (advanced), C, C++, MySQL"],
-  ["AI / ML", "JAX, PyTorch, TensorFlow, Keras, reinforcement learning (GRPO, RLVR), Weights & Biases, TensorBoard"],
-  ["LLMs & retrieval", "LangChain, LlamaIndex, ChromaDB (vector DB), multi-agent systems"],
-  ["Backend & data", "FastAPI, Celery, Redis, MongoDB (Beanie ODM)"],
-  ["Tools", "Docker, Git, GitHub, Hugging Face Spaces"],
-  ["Embedded", "ESP32, Arduino C++, MQTT, Firebase Realtime Database"],
-  ["Interests", "Machine learning, deep learning, computer vision, agentic AI, large language models, backend engineering"],
+  ["Programming & core", "Python, C, C++, Java, Data Structures & Algorithms"],
+  ["AI / ML & frameworks", "PyTorch, JAX, TensorFlow, LangChain, LlamaIndex, Weights & Biases, LoRA fine-tuning, RAG, Agentic AI"],
+  ["Backend & databases", "FastAPI, MySQL, MongoDB, Redis, ChromaDB"],
+  ["Tools & platforms", "Git, GitHub, Docker, Hugging Face"],
 ];
 
-const projects: { title: string; role: string; date: string; slug?: string; tech: string; points: string[] }[] = [
+const experience = [
+  {
+    title: "Engineering Intern",
+    org: "Forge Innovations & Ventures",
+    date: "Jul 2026 — Present",
+    link: { href: "/projects/atmosyn", label: "Atmosyn" },
+    points: [
+      "Working on the electronics and software stack for Atmosyn, a modular industrial gas-emissions monitoring system that measures CO₂, CO, particulate matter, temperature and humidity directly from exhaust lines.",
+      "Interfacing multi-sensor arrays with ESP32 microcontrollers for real-time data acquisition, timestamping and transmission.",
+      "Building a real-time monitoring dashboard for live telemetry visualisation and sensor-health tracking.",
+    ],
+  },
+  {
+    title: "AI & Vision Member",
+    org: "Qbotix Rover Team",
+    date: "Sep 2026 — Present",
+    points: [
+      "Developing AI-based perception pipelines using YOLO for real-time object detection and classification.",
+      "Working on autonomous navigation using ROS 2, SLAM and Nav2, alongside multi-camera vision and GNSS integration.",
+      "Building camera streaming and telemetry interfaces for real-time rover monitoring and localisation.",
+    ],
+  },
+];
+
+const projects = [
+  {
+    title: "SatSaathi",
+    role: "Multimodal remote-sensing vision-language assistant",
+    slug: "satsaathi",
+    points: [
+      "Built an auditable satellite-imagery copilot supporting English, Hindi, Tamil and Bangla, with an 8-step deterministic execution trace and confidence-gated human review.",
+      "Implemented pixel-level spectral index computation (NDVI, NDWI, LSWI) and ground-area calculation alongside a 4-bit Qwen3-VL-2B LoRA inference pipeline.",
+      "Architected an async FastAPI + Celery/Redis backend with Server-Sent Events streaming live job progress to a Next.js interface.",
+    ],
+  },
   {
     title: "PRRegression Audit",
-    role: "Multi-agent RL code reviewer · OpenEnv Hackathon Grand Finalist",
-    date: "Apr 2026",
+    role: "RL environment & multi-agent code reviewer",
     slug: "prregression-audit",
-    tech: "Python, FastAPI, GRPO fine-tuning, reinforcement learning, multi-agent systems, Docker, W&B",
+    repo: "https://github.com/SAISANJAYR/GitPRTriageEnv",
     points: [
-      "Engineered an autonomous 4-agent pipeline (Safety, Defect, Router, Comment) for PR regression detection.",
-      "Prevented reward hacking by deploying RLVR (verifiable rewards) for deterministic, zero-LLM programmatic grading.",
-      "Achieved a 2.1× performance gain on Medium tasks (reward 0.0382 → 0.5300) fine-tuning Qwen2.5-1.5B via GRPO.",
-      "Shipped a live W&B tracking dashboard on HuggingFace Spaces backed by 12+ async FastAPI endpoints.",
+      "Engineered an autonomous 4-agent pipeline (Safety, Defect, Router, Comment) for pull-request regression detection, backed by FastAPI and Docker.",
+      "Deployed deterministic programmatic grading (RLVR) to prevent reward hacking, achieving a 2.1× reward gain on Medium tasks by fine-tuning Qwen2.5-1.5B via GRPO.",
+      "Built a live Weights & Biases tracking dashboard hosted on Hugging Face Spaces, backed by async FastAPI endpoints.",
     ],
   },
   {
     title: "Smart Document Hub",
-    role: "Multilingual document intelligence",
-    date: "Jun 2026 — in progress",
+    role: "Multilingual document intelligence platform",
     slug: "smart-document-hub",
-    tech: "FastAPI, Next.js, LangChain, LlamaIndex, ChromaDB, MongoDB (Beanie ODM), Celery, Redis, spaCy, EasyOCR",
+    repo: "https://github.com/SAISANJAYR/smart-document-hub",
     points: [
-      "Architected an async FastAPI + Beanie ODM backend designed to keep document Q&A latency under 2 seconds.",
-      "Built a Celery + Redis background pipeline to isolate heavy AI processing from the request–response cycle.",
-      "Implemented a hybrid deadline-extraction engine using local spaCy NER and LangChain/Gemini classification.",
-      "Constructed a document knowledge graph via cosine similarity on ChromaDB embeddings, visualised with D3.js.",
-    ],
-  },
-  {
-    title: "CardioPredict",
-    role: "Low-level MLP regression model",
-    date: "May 2026",
-    slug: undefined,
-    tech: "JAX, XLA acceleration, functional programming",
-    points: [
-      "Bypassed high-level wrappers to build an MLP from scratch using pure functional-programming math.",
-      "Leveraged JAX primitives (vmap for vectorisation, grad for reverse-mode autodiff) to optimise XLA training.",
-      "Achieved a test MSE of 10.22 over 1,000 epochs using strict feature standardisation.",
+      "Architected an async FastAPI and MongoDB backend with a Celery + Redis worker pipeline to isolate heavy document processing and keep Q&A under 2 seconds.",
+      "Built a hybrid deadline-extraction engine combining local spaCy NER with LangChain/Gemini classification and a ChromaDB vector knowledge graph.",
     ],
   },
 ];
@@ -81,7 +93,7 @@ export default function ResumePage() {
           <div className="wrap">
             <div className="page-head__meta t-label">
               <span>§ Résumé</span>
-              <span>Updated 2026</span>
+              <span>Updated Nov 2026</span>
             </div>
             <div className="page-head__grid">
               <div className="page-head__title">
@@ -103,7 +115,7 @@ export default function ResumePage() {
                 </p>
               </div>
               <div className="page-head__intro no-print" style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                <a href={profile.resumePdf} download="SaiSanjayR_Resume.pdf" className="btn-solid">
+                <a href={profile.resumePdf} download="SaiSanjay_R_Resume.pdf" className="btn-solid">
                   Download PDF <span aria-hidden="true">↓</span>
                 </a>
                 <PrintButton />
@@ -116,25 +128,14 @@ export default function ResumePage() {
           <ResumeToc items={sections} />
 
           <div className="cv__body">
-            <section id="profile" className="cv-sec" aria-labelledby="h-profile">
-              <h2 className="t-label t-muted" id="h-profile">
-                Profile
-              </h2>
-              <p className="t-lead" style={{ color: "var(--fg)" }}>
-                AI &amp; Data Science undergraduate at Kumaraguru College of Technology and ProtoSem intern at Forger
-                Innovations &amp; Ventures. I build agentic and reinforcement-learning systems, document-intelligence
-                backends and neural networks from first principles, and write software for the Qbotix Rover Team.
-              </p>
-            </section>
-
             <section id="education" className="cv-sec" aria-labelledby="h-education">
               <h2 className="t-label t-muted" id="h-education">
                 Education
               </h2>
               <div className="cv-item">
                 <div className="cv-item__head">
-                  <h3>{profile.college}, Coimbatore</h3>
-                  <span className="t-label t-muted">{profile.graduation}</span>
+                  <h3>{profile.college}</h3>
+                  <span className="t-label t-muted">Sep 2024 — May 2028</span>
                 </div>
                 <p className="cv-item__role t-label">{profile.degree}</p>
                 <p className="cv-item__tech t-mono">CGPA {profile.cgpa}</p>
@@ -159,45 +160,49 @@ export default function ResumePage() {
               <h2 className="t-label t-muted" id="h-experience">
                 Experience
               </h2>
-              <div className="cv-item">
-                <div className="cv-item__head">
-                  <h3>ProtoSem Intern — Forger Innovations &amp; Ventures</h3>
-                  <span className="t-label t-muted">Jul 2026 — Present</span>
+              {experience.map((e) => (
+                <div className="cv-item" key={e.org}>
+                  <div className="cv-item__head">
+                    <h3>
+                      {e.title} — {e.org}
+                    </h3>
+                    <span className="t-label t-muted">{e.date}</span>
+                  </div>
+                  {e.link && (
+                    <p className="cv-item__role t-label">
+                      <Link href={e.link.href} className="link-u">
+                        {e.link.label} →
+                      </Link>
+                    </p>
+                  )}
+                  <ul>
+                    {e.points.map((pt) => (
+                      <li key={pt}>{pt}</li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="cv-item__role t-label">Internship · 20-week interdisciplinary programme</p>
-                <ul>
-                  <li>
-                    Working across disciplines on hands-on builds, with every week documented in a{" "}
-                    <a href="/protosem" className="link-u">
-                      public log
-                    </a>
-                    .
-                  </li>
-                  <li>Week 07: five IoT builds, from local HTTP control to cloud telemetry and relay automation.</li>
-                </ul>
-              </div>
+              ))}
             </section>
 
             <section id="projects" className="cv-sec" aria-labelledby="h-projects">
               <h2 className="t-label t-muted" id="h-projects">
-                Selected projects
+                Projects
               </h2>
               {projects.map((p) => (
                 <div className="cv-item" key={p.title}>
                   <div className="cv-item__head">
                     <h3>
-                      {p.slug ? (
-                        <Link href={`/projects/${p.slug}`} className="link-u">
-                          {p.title}
-                        </Link>
-                      ) : (
-                        p.title
-                      )}
+                      <Link href={`/projects/${p.slug}`} className="link-u">
+                        {p.title}
+                      </Link>
                     </h3>
-                    <span className="t-label t-muted">{p.date}</span>
+                    {p.repo && (
+                      <a href={p.repo} target="_blank" rel="noopener noreferrer" className="t-label t-muted link-u">
+                        GitHub ↗
+                      </a>
+                    )}
                   </div>
                   <p className="cv-item__role t-label">{p.role}</p>
-                  <p className="cv-item__tech t-mono">{p.tech}</p>
                   <ul>
                     {p.points.map((pt) => (
                       <li key={pt}>{pt}</li>
@@ -205,91 +210,29 @@ export default function ResumePage() {
                   </ul>
                 </div>
               ))}
-              <div className="cv-item">
-                <div className="cv-item__head">
-                  <h3>
-                    <a href="/iot" className="link-u">
-                      IoT &amp; Embedded Systems
-                    </a>
-                  </h3>
-                  <span className="t-label t-muted">ProtoSem · Week 07</span>
-                </div>
-                <p className="cv-item__role t-label">ESP32 cloud telemetry &amp; automation</p>
-                <p className="cv-item__tech t-mono">ESP32, Arduino C++, MQTT / Adafruit IO, IFTTT, Firebase RTDB</p>
-                <ul>
-                  <li>Built five ESP32 tasks from local HTTP LED control to MQTT relay switching of a 230 V lamp.</li>
-                  <li>Streamed DHT11 and LDR telemetry to a Firebase dashboard with auto/manual relay modes and CSV export.</li>
-                </ul>
-              </div>
-            </section>
-
-
-
-            <section id="leadership" className="cv-sec" aria-labelledby="h-leadership">
-              <h2 className="t-label t-muted" id="h-leadership">
-                Leadership &amp; teams
-              </h2>
-              <div className="cv-item">
-                <div className="cv-item__head">
-                  <h3>Member, Software domain — Qbotix Rover Team</h3>
-                  <span className="t-label t-muted">Sep 2026 — Present</span>
-                </div>
-                <ul>
-                  <li>Student-led rover team; member of the Software domain.</li>
-                </ul>
-              </div>
-              <div className="cv-item">
-                <div className="cv-item__head">
-                  <h3>Operations Lead — GDG on Campus</h3>
-                </div>
-                <ul>
-                  <li>Spearheaded backend and pipeline debugging challenges for student bootcamps.</li>
-                </ul>
-              </div>
             </section>
 
             <section id="achievements" className="cv-sec" aria-labelledby="h-achievements">
               <h2 className="t-label t-muted" id="h-achievements">
-                Achievements
+                Extracurricular &amp; achievements
               </h2>
               <div className="cv-item">
                 <ul style={{ marginTop: 0 }}>
                   <li>
-                    <strong>Grand Finalist, Meta PyTorch OpenEnv Hackathon</strong> — organised by Meta, PyTorch and Scaler
-                    School of Technology; 48-hour in-person grand finale in Bengaluru, Apr 2026. Built{" "}
+                    <strong>Finalist, OpenEnv Hackathon</strong> (Scaler School of Technology × Meta × Hugging Face ×
+                    PyTorch), Bengaluru — co-created{" "}
                     <Link href="/projects/prregression-audit" className="link-u">
                       PRRegression Audit
-                    </Link>{" "}
-                    with Sudharshan R.
+                    </Link>
+                    .
                   </li>
                   <li>
-                    <strong>Mahatma Gandhi Merit Scholarship</strong> — awarded for sustained academic excellence at KCT,
-                    2025–26.
+                    <strong>Mahatma Gandhi Merit Scholarship</strong> — awarded for sustained academic excellence at KCT
+                    (2025–26).
                   </li>
                   <li>
-                    <strong>3rd place, Open Ideathon</strong> — among competitive institutional cohorts, Kumaraguru College
-                    of Technology.
-                  </li>
-                  <li>
-                    <strong>Flipkart GRiD</strong> — national-level hackathon; robotics vision and pipeline optimisation.
-                  </li>
-                </ul>
-              </div>
-            </section>
-
-            <section id="activities" className="cv-sec" aria-labelledby="h-activities">
-              <h2 className="t-label t-muted" id="h-activities">
-                Activities
-              </h2>
-              <div className="cv-item">
-                <ul style={{ marginTop: 0 }}>
-                  <li>
-                    <strong>Algorithmic consistency</strong> — 100+ DSA problems solved on LeetCode, with a focus on
-                    optimisation and runtime complexity.
-                  </li>
-                  <li>
-                    <strong>Coursework beyond the syllabus</strong> — Harvard CS50P and CS50AI; Deep Learning for
-                    Computer Vision with TensorFlow.
+                    <strong>Operations Lead, GDG on Campus (KCT)</strong> — organised technical bootcamps and
+                    backend/debugging challenges.
                   </li>
                 </ul>
               </div>

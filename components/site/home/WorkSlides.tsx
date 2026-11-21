@@ -7,49 +7,29 @@ import { projects } from "@/data/projects";
 import { pad } from "../bits";
 import { useScrollProgress } from "../useScrollProgress";
 
-/** Photo that tilts toward the cursor, with a soft glare. */
-function Tilt({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const onMove = (e: React.PointerEvent) => {
-    const el = ref.current;
-    if (!el || e.pointerType !== "mouse") return;
-    const r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    el.style.setProperty("--rx", `${(-y * 7).toFixed(2)}deg`);
-    el.style.setProperty("--ry", `${(x * 9).toFixed(2)}deg`);
-    el.style.setProperty("--gx", `${((x + 0.5) * 100).toFixed(1)}%`);
-    el.style.setProperty("--gy", `${((y + 0.5) * 100).toFixed(1)}%`);
-    el.dataset.hover = "1";
-  };
-  const onLeave = () => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.setProperty("--rx", "0deg");
-    el.style.setProperty("--ry", "0deg");
-    delete el.dataset.hover;
-  };
-  return (
-    <div className="tilt" onPointerMove={onMove} onPointerLeave={onLeave}>
-      <div ref={ref} className="tilt__card">
-        {children}
-        <span className="tilt__glare" aria-hidden="true" />
-      </div>
-    </div>
-  );
+const N = projects.length;
+
+/** A soft magnet: cards settle near the centre without ever stopping dead. */
+function settle(p: number) {
+  const i = Math.floor(p);
+  const f = p - i;
+  const s = f * f * (3 - 2 * f); // smoothstep
+  return i + f * 0.45 + s * 0.55;
 }
 
 /**
- * Selected work as a horizontal reel. On desktop the section pins and
- * vertical scrolling moves it sideways; on touch screens and for reduced
- * motion it is a native, swipeable scroll-snap strip.
+ * Selected work on an arc. The section pins on desktop and scrolling turns
+ * the arc: the card at the top is larger and fully lit, its neighbours tilt
+ * away and fall back along the curve. On touch screens the same arc is a
+ * swipeable strip.
  */
 export default function WorkSlides() {
   const outer = useRef<HTMLElement>(null);
-  const track = useRef<HTMLDivElement>(null);
-  const bar = useRef<HTMLSpanElement>(null);
-  const distance = useRef(0);
+  const stage = useRef<HTMLDivElement>(null);
+  const strip = useRef<HTMLDivElement>(null);
   const [pinned, setPinned] = useState(false);
+  const [active, setActive] = useState(0);
+  const activeRef = useRef(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 900px) and (hover: hover) and (prefers-reduced-motion: no-preference)");
@@ -59,115 +39,148 @@ export default function WorkSlides() {
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  // Height of the scroll runway = horizontal distance + one viewport.
-  useEffect(() => {
-    const o = outer.current;
-    const t = track.current;
-    if (!o || !t) return;
-    if (!pinned) {
-      o.style.height = "";
-      t.style.transform = "";
-      return;
+  /** Write each card's distance from the centre (--d) — CSS does the rest. */
+  const place = useCallback((pos: number) => {
+    const el = stage.current;
+    if (!el) return;
+    el.querySelectorAll<HTMLElement>(".arc__card").forEach((c, i) => {
+      const d = i - pos;
+      c.style.setProperty("--d", d.toFixed(4));
+      c.style.setProperty("--ad", Math.abs(d).toFixed(4));
+      c.style.zIndex = String(10 - Math.round(Math.abs(d)));
+    });
+    const a = Math.min(N - 1, Math.max(0, Math.round(pos)));
+    if (a !== activeRef.current) {
+      activeRef.current = a;
+      setActive(a);
     }
-    const size = () => {
-      distance.current = Math.max(0, t.scrollWidth - window.innerWidth);
-      o.style.height = `${distance.current + window.innerHeight}px`;
-    };
-    size();
-    const ro = new ResizeObserver(size);
-    ro.observe(t);
-    window.addEventListener("resize", size);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", size);
-    };
-  }, [pinned]);
-
-  const onProgress = useCallback((p: number) => {
-    if (track.current) track.current.style.transform = `translate3d(${(-p * distance.current).toFixed(1)}px,0,0)`;
-    if (bar.current) bar.current.style.transform = `scaleX(${p.toFixed(4)})`;
   }, []);
 
+  // Scroll sets a target; a frame loop glides the arc toward it with inertia.
+  const target = useRef(0);
+  const current = useRef(0);
+  const raf = useRef(0);
+  const last = useRef(0);
+
+  const tick = useCallback(
+    (t: number) => {
+      const dt = last.current ? Math.min(64, t - last.current) : 16.7;
+      last.current = t;
+      const k = 1 - Math.pow(1 - 0.085, dt / 16.7);
+      current.current += (target.current - current.current) * k;
+      if (Math.abs(target.current - current.current) < 0.0004) current.current = target.current;
+      place(current.current);
+      if (current.current !== target.current) raf.current = requestAnimationFrame(tick);
+      else {
+        raf.current = 0;
+        last.current = 0;
+      }
+    },
+    [place]
+  );
+
+  const onProgress = useCallback(
+    (p: number) => {
+      target.current = settle(p * (N - 1));
+      if (!raf.current) raf.current = requestAnimationFrame(tick);
+    },
+    [tick]
+  );
   useScrollProgress(outer, onProgress, { mode: "sticky", enabled: pinned });
+  useEffect(() => () => cancelAnimationFrame(raf.current), []);
+
+  // Touch / reduced motion: derive the position from the strip's scroll.
+  useEffect(() => {
+    if (pinned) return;
+    const s = strip.current;
+    if (!s) return;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const cards = s.querySelectorAll<HTMLElement>(".arc__card");
+      if (!cards.length) return;
+      const step = cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : 1;
+      place(s.scrollLeft / step);
+    };
+    const on = () => {
+      if (!raf) raf = requestAnimationFrame(read);
+    };
+    read();
+    s.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => {
+      s.removeEventListener("scroll", on);
+      window.removeEventListener("resize", on);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [pinned, place]);
 
   return (
-    <section ref={outer} className={`hs${pinned ? " is-pinned" : ""}`} aria-labelledby="work-title">
-      <div className="hs__sticky">
-        <div className="hs__track" ref={track}>
-          <div className="hs__panel hs__panel--statement">
-            <p className="hs__kicker t-label" aria-hidden="true">
-              saisanjay .r
-            </p>
-            <div className="hs__statement">
-              <p className="hs__big">
-                Learning by
-                <br />
-                building —
-              </p>
-              <span className="hs__rule" aria-hidden="true" />
-              <p className="hs__line">agents that can’t cheat their own grader,</p>
-              <p className="hs__line">backends that stay quick under heavy work,</p>
-              <p className="hs__line">and the maths beneath the frameworks.</p>
-            </div>
-            <p className="hs__some" aria-hidden="true">
-              This is some of it. <span>→</span>
-            </p>
-          </div>
-
-          <div className="hs__panel hs__panel--intro">
-            <p className="t-label t-muted">
-              Featured · {pad(projects.length)} projects
-            </p>
-            <h2 className="hs__title" id="work-title">
-              Selected
-              <br />
-              Work.
+    <section
+      ref={outer}
+      className={`arc${pinned ? " is-pinned" : ""}`}
+      style={pinned ? { height: `${(N - 1) * 80 + 100}vh` } : undefined}
+      aria-labelledby="work-title"
+    >
+      <div className="arc__sticky">
+        <header className="arc__head wrap">
+          <div>
+            <p className="arc__kicker">Selected work</p>
+            <h2 className="arc__title" id="work-title">
+              Things I’ve <em>built.</em>
             </h2>
-            <p className="hs__cue">{pinned ? "Scroll right to explore →" : "Swipe to explore →"}</p>
           </div>
+          <p className="arc__count" aria-live="polite">
+            <span>{pad(active + 1)}</span> / {pad(N)}
+          </p>
+        </header>
 
-          {projects.map((p, i) => {
-            const href = `/projects/${p.slug}`;
-            return (
-              <article className="hs__card" key={p.slug} aria-labelledby={`slide-${p.slug}`}>
-                <div className="hs__text">
-                  <div>
-                    <p className="hs__num">{pad(i + 1)}/</p>
-                    <h3 className="hs__name" id={`slide-${p.slug}`}>
-                      {p.title}
-                    </h3>
-                  </div>
-                  <p className="hs__cat">{p.category}</p>
-                  <p className="hs__quote">“{p.quote}”</p>
-                  {p.award && <p className="hs__award">{p.award}</p>}
-                  <Link href={href} className="hs__view" aria-label={`View ${p.title}`}>
-                    View Project <span aria-hidden="true">→</span>
+        <div className="arc__stage" ref={stage}>
+          <div className="arc__strip" ref={strip}>
+            {projects.map((p, i) => {
+              const href = `/projects/${p.slug}`;
+              return (
+                <article
+                  key={p.slug}
+                  className={`arc__card${i === active ? " is-active" : ""}`}
+                  style={{ "--d": i } as React.CSSProperties}
+                  aria-labelledby={`arc-${p.slug}`}
+                >
+                  <Link href={href} className="arc__link" tabIndex={i === active || !pinned ? 0 : -1}>
+                    <div className="arc__img">
+                      <Image src={p.photo.src} alt={p.photo.alt} fill sizes="(max-width: 900px) 78vw, 36vw" />
+                      {p.award && <span className="arc__award">{p.award}</span>}
+                    </div>
+                    <div className="arc__body">
+                      <p className="arc__meta">
+                        <span>{pad(i + 1)}</span>
+                        <span>{p.category}</span>
+                        <span>{p.year}</span>
+                      </p>
+                      <h3 className="arc__name" id={`arc-${p.slug}`}>
+                        {p.title}
+                      </h3>
+                      <p className="arc__quote">{p.quote}</p>
+                      <span className="arc__view">
+                        View project <span aria-hidden="true">→</span>
+                      </span>
+                    </div>
                   </Link>
-                  <p className="hs__year">{p.year}</p>
-                </div>
-                <Link href={href} className="hs__media" tabIndex={-1} aria-hidden="true">
-                  <Tilt>
-                    <Image src={p.photo.src} alt="" width={1600} height={1067} sizes="(max-width: 900px) 86vw, 44vw" />
-                  </Tilt>
-                </Link>
-              </article>
-            );
-          })}
-
-          <div className="hs__panel hs__panel--end">
-            <p className="hs__more">
-              More where that
-              <br />
-              came from?
-            </p>
-            <Link href="/projects" className="hs__view">
-              See all projects <span aria-hidden="true">→</span>
-            </Link>
+                </article>
+              );
+            })}
           </div>
         </div>
 
-        <div className="hs__progress" aria-hidden="true">
-          <span ref={bar} />
+        <div className="arc__foot wrap">
+          <ol className="arc__dots" aria-hidden="true">
+            {projects.map((p, i) => (
+              <li key={p.slug} className={i === active ? "is-on" : undefined} />
+            ))}
+          </ol>
+          <Link href="/projects" className="arc__all">
+            All projects <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </div>
     </section>

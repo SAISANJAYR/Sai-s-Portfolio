@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "@/components/site/SiteFooter";
-import ListenSlot from "@/components/site/ListenSlot";
 import { pad } from "@/components/site/bits";
-import { hobbies, listening, protosemHref, roles } from "@/data/profile";
+import { hobbies, protosemHref, roles, song } from "@/data/profile";
 import { projects } from "@/data/projects";
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "About SaiSanjay R — what he works on, where he is now (ProtoSem intern at Forger Innovations & Ventures, Qbotix Rover Team), the ideas he keeps returning to, and life away from the screen.",
+    "About SaiSanjay R — what he works on, where he is now (Engineering Intern at Forge Innovations & Ventures, AI & Vision at Qbotix Rover Team), the ideas he keeps returning to, and life away from the screen.",
 };
 
 /** In SaiSanjay's own words, from the Journey chapters. */
@@ -196,11 +195,19 @@ export default function AboutPage() {
                   On <span className="t-italic">repeat.</span>
                 </h2>
               </div>
-              <div className="listen reveal">
-                {listening.map((l) => (
-                  <ListenSlot key={l.src} label={l.label} src={l.src} />
-                ))}
-              </div>
+              <figure className="off__song reveal">
+                <figcaption className="t-label t-muted">
+                  {song.title} — {song.artist}
+                </figcaption>
+                <iframe
+                  src={song.src}
+                  title={`Spotify — ${song.title} by ${song.artist}`}
+                  width="100%"
+                  height="152"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                />
+              </figure>
             </div>
           </div>
         </section>

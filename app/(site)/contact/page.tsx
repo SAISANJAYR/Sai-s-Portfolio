@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const channels = [
   { name: "GitHub", handle: `@${profile.githubHandle}`, href: profile.github, external: true },
   { name: "LinkedIn", handle: profile.linkedinHandle, href: profile.linkedin, external: true },
-  { name: "Résumé", handle: "SaiSanjayR_Resume.pdf", href: profile.resumePdf, download: true },
+  { name: "Résumé", handle: "SaiSanjay_R_Resume.pdf", href: profile.resumePdf, download: true },
   { name: "Academic log", handle: "ProtoSem Expedition", href: "/protosem" },
 ];
 
